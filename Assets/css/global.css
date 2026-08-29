@@ -1,0 +1,151 @@
+/* ========================================================
+   GLOBAL STYLES (Tokens, Base, Utilities, Accessibility)
+   ======================================================== */
+
+/* --- DESIGN TOKENS --- */
+:root {
+    /* Brand */
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-active: #3730a3;
+    --primary-soft: #eef2ff;
+
+    /* Semantic */
+    --success-color: #16a34a;
+    --success-soft: #dcfce7;
+    --danger-color: #dc2626;
+    --danger-soft: #fee2e2;
+    --warning-color: #d97706;
+    --warning-soft: #fef3c7;
+    --info-color: #0284c7;
+    --info-soft: #e0f2fe;
+
+    /* Surfaces */
+    --bg-color: #f8fafc;
+    --surface-color: #ffffff;
+    --border-color: #e2e8f0;
+    --border-color-soft: #f1f5f9;
+
+    /* Sidebar (Admin only, but kept here as global tokens) */
+    --sidebar-bg: #0f172a;
+    --sidebar-bg-alt: #16213a;
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-active: rgba(255, 255, 255, 0.12);
+    --sidebar-text: #94a3b8;
+    --sidebar-text-hover: #ffffff;
+    --sidebar-width: 260px;
+    --sidebar-width-collapsed: 80px;
+
+    /* Text */
+    --text-main: #334155;
+    --text-heading: #0f172a;
+    --text-muted: #64748b;
+    --text-subtle: #94a3b8;
+
+    /* Elevation */
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+
+    /* Motion */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+}
+
+/* --- BASE --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-heading);
+    font-weight: 700;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+::selection {
+    background-color: var(--primary-soft);
+    color: var(--primary-active);
+}
+
+/* Slim, unobtrusive scrollbars */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(15, 23, 42, 0.2);
+    border-radius: var(--radius-pill);
+}
+
+/* --- UTILITIES --- */
+.text-muted-custom { color: var(--text-muted) !important; }
+.rounded-lg { border-radius: var(--radius-lg) !important; }
+.shadow-soft { box-shadow: var(--card-shadow) !important; }
+.divider { border-top: 1px solid var(--border-color-soft); margin: var(--space-4) 0; }
+
+/* Skeleton loading state */
+.skeleton {
+    background: linear-gradient(90deg, var(--border-color-soft) 25%, var(--border-color) 37%, var(--border-color-soft) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease infinite;
+    border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+}
+
+/* --- ACCESSIBILITY --- */
+:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
