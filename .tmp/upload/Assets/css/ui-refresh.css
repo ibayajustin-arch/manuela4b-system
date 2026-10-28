@@ -1,0 +1,1348 @@
+/* ==========================================================================
+   UI REFRESH — Manuela 4B MIS
+   One final layer that makes every screen share the same rhythm, typography,
+   surfaces and controls. Loaded last, so it settles the drifting values that
+   accumulated across global/components/admin/resident/reference-theme.
+   Keep it declarative: tokens first, then one rule per component.
+   ========================================================================== */
+
+:root {
+    /* Surfaces */
+    --ui-bg: #0A111F;
+    --ui-surface: #101A2C;
+    --ui-surface-2: #0C1526;
+    --ui-surface-3: #16233A;
+    --ui-border: rgba(255, 255, 255, 0.07);
+    --ui-border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text */
+    --ui-text: #E6EDF7;
+    --ui-muted: #94A3B8;
+    --ui-subtle: #64748B;
+
+    /* Brand */
+    --ui-primary: #818CF8;
+    --ui-primary-strong: #6366F1;
+    --ui-primary-soft: rgba(129, 140, 248, 0.14);
+    --ui-accent: #F59E0B;
+
+    /* Shape & rhythm */
+    --ui-radius: 16px;
+    --ui-radius-sm: 10px;
+    --ui-radius-lg: 20px;
+    --ui-gap: 20px;
+    --ui-page-pad: clamp(16px, 2.4vw, 36px);
+    --ui-control-h: 44px;
+    --ui-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    --ui-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.4);
+
+    /* Align legacy tokens with the refresh so older rules inherit the same look */
+    --bg-color: #0A111F;
+    --surface-color: #101A2C;
+    --surface-color-alt: #0C1526;
+    --surface-card: #101A2C;
+    --border-color: rgba(255, 255, 255, 0.07);
+    --border-color-soft: rgba(255, 255, 255, 0.05);
+    --text-main: #E6EDF7;
+    --text-muted: #94A3B8;
+    --text-subtle: #64748B;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   BASE
+   Inter for interface text (tables, forms, labels), Poppins for headings and
+   brand. This alone makes dense screens easier to scan.
+   -------------------------------------------------------------------------- */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+    color: var(--ui-text) !important;
+    background: var(--ui-bg) !important;
+    letter-spacing: -0.005em;
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-name,
+.login-shell h1,
+.login-shell h2,
+.login-card h1,
+.login-card h2 {
+    font-family: 'Poppins', 'Inter', sans-serif !important;
+    letter-spacing: -0.025em;
+}
+
+.app-wrapper,
+.main-content {
+    background: var(--ui-bg) !important;
+}
+
+.main-content {
+    padding: var(--ui-page-pad) !important;
+}
+
+.main-content > .container-fluid {
+    max-width: 1640px;
+    padding-inline: 0;
+}
+
+::selection {
+    background: rgba(129, 140, 248, 0.28);
+    color: #FFFFFF;
+}
+
+/* Keep the analytics toolbar flat (the page theme gives these a glow) */
+.an-actions .btn,
+.an-filters .btn {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   PAGE HEADER — one shape everywhere: title, optional one-line context, actions
+   -------------------------------------------------------------------------- */
+.page-header {
+    align-items: flex-end !important;
+    gap: 14px 24px !important;
+    margin-bottom: 22px !important;
+    padding: 0 !important;
+    flex-wrap: wrap;
+}
+
+.main-content .page-header h1,
+.page-header h1 {
+    font-size: clamp(1.45rem, 1.9vw, 1.9rem) !important;
+    font-weight: 650 !important;
+    line-height: 1.22 !important;
+    letter-spacing: -0.03em !important;
+    margin: 0 !important;
+    color: #FFFFFF !important;
+}
+
+.page-header p {
+    max-width: 72ch;
+    margin: 5px 0 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    color: var(--ui-muted) !important;
+}
+
+.page-header .btn,
+.page-header .d-flex .btn {
+    flex-shrink: 0;
+}
+
+/* A quiet eyebrow for pages that need a section label above the title */
+.page-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ui-primary);
+}
+
+/* --------------------------------------------------------------------------
+   CARDS & PANELS — border-defined, not shadow-defined
+   -------------------------------------------------------------------------- */
+.card,
+.modal-content {
+    background: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+    box-shadow: none !important;
+    color: var(--ui-text) !important;
+}
+
+.card {
+    transition: border-color 0.18s ease, background-color 0.18s ease !important;
+}
+
+.card-body {
+    padding: 20px 22px !important;
+}
+
+.card-header {
+    padding: 14px 22px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    border-bottom: 1px solid var(--ui-border) !important;
+    background: transparent !important;
+}
+
+.card-footer {
+    border-top: 1px solid var(--ui-border) !important;
+    background: transparent !important;
+}
+
+.card h2,
+.card h3 {
+    color: #FFFFFF !important;
+}
+
+.card h2 {
+    font-size: 1.06rem !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.card h3 {
+    font-size: 0.98rem !important;
+    font-weight: 600 !important;
+}
+
+.card > p,
+.card-body > p {
+    color: var(--ui-muted);
+}
+
+/* Only interactive cards react to hover */
+.card.hover-lift:hover,
+a:hover > .card.hover-lift {
+    transform: none !important;
+    border-color: rgba(129, 140, 248, 0.28) !important;
+    box-shadow: none !important;
+    background: #121D33 !important;
+}
+
+/* --------------------------------------------------------------------------
+   BUTTONS — flat, consistent height, no jump on hover
+   -------------------------------------------------------------------------- */
+.btn {
+    min-height: 42px !important;
+    padding: 0.54rem 1.05rem !important;
+    border-radius: var(--ui-radius-sm) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease !important;
+}
+
+.btn:hover,
+.btn:focus,
+.btn:active {
+    transform: none !important;
+}
+
+.btn:hover i {
+    transform: none !important;
+}
+
+.btn i {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.btn-primary {
+    background: var(--ui-primary-strong) !important;
+    border: 1px solid var(--ui-primary-strong) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    background: #4F46E5 !important;
+    border-color: #4F46E5 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-outline-primary {
+    background: transparent !important;
+    border: 1px solid rgba(129, 140, 248, 0.45) !important;
+    color: #A5B4FC !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus-visible {
+    background: rgba(129, 140, 248, 0.12) !important;
+    border-color: #818CF8 !important;
+    color: #C7D2FE !important;
+}
+
+.btn-outline-secondary,
+.btn-light,
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid var(--ui-border-strong) !important;
+    color: #CBD5E1 !important;
+}
+
+.btn-outline-secondary:hover,
+.btn-light:hover,
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-success {
+    background: #059669 !important;
+    border-color: #059669 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-danger {
+    background: #DC2626 !important;
+    border-color: #DC2626 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-outline-danger {
+    background: transparent !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    color: #FCA5A5 !important;
+}
+
+.btn-outline-danger:hover {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: #EF4444 !important;
+    color: #FECACA !important;
+}
+
+.btn-sm {
+    min-height: 34px !important;
+    padding: 0.32rem 0.7rem !important;
+    font-size: 0.8125rem !important;
+    border-radius: 8px !important;
+}
+
+.btn-lg {
+    min-height: 48px !important;
+    padding: 0.7rem 1.35rem !important;
+    font-size: 0.95rem !important;
+}
+
+.btn-icon {
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+}
+
+/* Keep the dashboard's analytics CTA in the header, not floating over content */
+.dashboard-view-analytics {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    min-height: 42px !important;
+    padding-inline: 1.05rem !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: var(--ui-accent) !important;
+    color: #0A111F !important;
+    border: 1px solid var(--ui-accent) !important;
+    box-shadow: none !important;
+    font-weight: 650 !important;
+}
+
+.dashboard-view-analytics:hover,
+.dashboard-view-analytics:focus {
+    background: #D97706 !important;
+    border-color: #D97706 !important;
+    color: #0A111F !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.dashboard-page-header {
+    padding-right: 0 !important;
+    min-height: 0 !important;
+    margin-bottom: 22px !important;
+}
+
+/* --------------------------------------------------------------------------
+   FORMS
+   -------------------------------------------------------------------------- */
+.form-label,
+.form-check-label,
+label.form-label {
+    margin-bottom: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.005em;
+    color: var(--ui-muted) !important;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    min-height: var(--ui-control-h) !important;
+    padding: 0.55rem 0.85rem !important;
+    border-radius: var(--ui-radius-sm) !important;
+    border: 1px solid var(--ui-border-strong) !important;
+    background-color: var(--ui-surface-2) !important;
+    color: #F1F5F9 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+    font-weight: 450 !important;
+    box-shadow: none !important;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.form-control:hover,
+.form-select:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--ui-surface-2) !important;
+    border-color: var(--ui-primary) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.18) !important;
+    outline: 0 !important;
+}
+
+.form-control::placeholder {
+    color: var(--ui-subtle) !important;
+    font-weight: 400;
+}
+
+/* Auth inputs reserve room for their leading icon and trailing eye toggle.
+   The generic control padding above must not collapse those gutters. */
+.auth-input-group > .auth-input {
+    padding-left: 2.85rem !important;
+    padding-right: 3.25rem !important;
+}
+
+.password-visibility-field--inline .form-control {
+    padding-right: 3.25rem !important;
+}
+
+/* Login/register CTAs keep the flat treatment (no glow) */
+.login-shell .btn,
+.login-card .btn {
+    box-shadow: none !important;
+}
+
+.login-left-inner .btn-primary:hover,
+.login-left-inner .btn-primary:focus,
+.register-page .register-submit:hover {
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.form-select option {
+    background: var(--ui-surface) !important;
+    color: var(--ui-text) !important;
+}
+
+.form-text,
+.form-text.text-muted,
+small.text-muted {
+    color: var(--ui-subtle) !important;
+    font-size: 0.78rem !important;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid,
+.was-validated .form-control:invalid {
+    border-color: rgba(239, 68, 68, 0.65) !important;
+    background-image: none !important;
+}
+
+.invalid-feedback {
+    color: #FCA5A5 !important;
+    font-size: 0.78rem !important;
+}
+
+.input-group > .form-control,
+.input-group > .form-select {
+    border-radius: var(--ui-radius-sm) !important;
+}
+
+.input-group .btn {
+    min-height: var(--ui-control-h) !important;
+}
+
+/* Old light-theme helper boxes */
+.password-visibility-note {
+    border-left: 3px solid var(--ui-primary) !important;
+    background: var(--ui-primary-soft) !important;
+    color: #CBD5E1 !important;
+    border-radius: 8px !important;
+}
+
+/* --------------------------------------------------------------------------
+   TABLES — quiet headers, roomy rows, no zebra noise
+   -------------------------------------------------------------------------- */
+.table-responsive {
+    border-radius: 12px;
+}
+
+.table {
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--ui-text) !important;
+    --bs-table-border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.table thead th {
+    padding: 11px 14px !important;
+    background: transparent !important;
+    color: var(--ui-subtle) !important;
+    font-size: 0.6875rem !important;
+    font-weight: 650 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--ui-border-strong) !important;
+    border-top: 0 !important;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    padding: 13px 14px !important;
+    color: #CBD5E1 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.045) !important;
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+.table-hover tbody tr:hover,
+.table tbody tr:hover {
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.03) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.table td .btn,
+.table td .badge {
+    vertical-align: middle;
+}
+
+.table-empty-state {
+    padding: 38px 20px !important;
+    color: var(--ui-subtle) !important;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+/* Full-row empty message inside a table */
+.table tbody td[colspan]:only-child {
+    padding: 40px 16px !important;
+    text-align: center;
+    color: var(--ui-subtle) !important;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.table-empty-state i {
+    color: var(--ui-subtle);
+    opacity: 0.75;
+}
+
+/* --------------------------------------------------------------------------
+   BADGES & PILLS — one size, soft fills, no borders
+   -------------------------------------------------------------------------- */
+.badge {
+    padding: 0.32em 0.62em !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: none !important;
+}
+
+.badge-success,
+.text-bg-success {
+    background: rgba(16, 185, 129, 0.14) !important;
+    color: #6EE7B7 !important;
+}
+
+.badge-danger,
+.text-bg-danger {
+    background: rgba(239, 68, 68, 0.14) !important;
+    color: #FCA5A5 !important;
+}
+
+.badge-warning,
+.text-bg-warning {
+    background: rgba(245, 158, 11, 0.14) !important;
+    color: #FCD34D !important;
+}
+
+.badge-info,
+.text-bg-info {
+    background: rgba(59, 130, 246, 0.14) !important;
+    color: #93C5FD !important;
+}
+
+.badge-neutral,
+.text-bg-secondary,
+.text-bg-light {
+    background: rgba(255, 255, 255, 0.07) !important;
+    color: #CBD5E1 !important;
+}
+
+.text-bg-primary {
+    background: rgba(129, 140, 248, 0.16) !important;
+    color: #C7D2FE !important;
+}
+
+/* --------------------------------------------------------------------------
+   SIDEBAR
+   -------------------------------------------------------------------------- */
+.sidebar {
+    background: #070C18 !important;
+    border-right: 1px solid var(--ui-border) !important;
+}
+
+.sidebar-brand {
+    padding: 18px 16px !important;
+}
+
+.sidebar .nav-link {
+    min-height: 42px !important;
+    margin: 2px 0 !important;
+    padding: 9px 12px !important;
+    gap: 11px !important;
+    border: 1px solid transparent !important;
+    border-radius: var(--ui-radius-sm) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #94A3B8 !important;
+}
+
+.sidebar .nav-link i,
+.sidebar .nav-link svg {
+    font-size: 1.08rem !important;
+    color: #7C8BA1 !important;
+}
+
+.sidebar .nav-link:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #FFFFFF !important;
+}
+
+.sidebar .nav-link:hover:not(.active) i {
+    color: #FFFFFF !important;
+}
+
+.sidebar .nav-link.active {
+    background: var(--ui-primary-soft) !important;
+    border-color: rgba(129, 140, 248, 0.22) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    box-shadow: inset 2px 0 0 var(--ui-primary) !important;
+}
+
+.sidebar .nav-link.active i {
+    color: var(--ui-primary) !important;
+}
+
+.sidebar-section-label {
+    padding: 0 12px 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.6563rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    color: #5B6B82 !important;
+}
+
+.sidebar-badge {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700;
+    display: inline-grid;
+    place-items: center;
+}
+
+.sidebar-footer {
+    padding: 12px 14px 16px !important;
+    border-top: 1px solid var(--ui-border) !important;
+}
+
+.sidebar-user {
+    min-height: 56px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--ui-border) !important;
+    padding: 8px 10px !important;
+}
+
+.sidebar-user-name {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+}
+
+.sidebar-role-pill {
+    font-size: 0.625rem !important;
+    letter-spacing: 0.07em;
+    color: #8FA0B8 !important;
+}
+
+/* Notification entry beside the account (desktop); the mobile bar keeps its bell */
+.sidebar-notif-btn {
+    width: 100% !important;
+    height: 40px !important;
+    margin-bottom: 8px;
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center;
+    gap: 11px;
+    border: 0 !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: transparent !important;
+    color: #94A3B8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.sidebar-notif-btn i {
+    font-size: 1.08rem;
+    color: #7C8BA1;
+}
+
+.sidebar-notif-btn:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #FFFFFF !important;
+}
+
+.sidebar-notif-btn:hover i {
+    color: #FFFFFF;
+}
+
+.sidebar-notif-count {
+    margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #EF4444;
+    color: #FFFFFF;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    line-height: 1;
+}
+
+.sidebar-notif-count[hidden] {
+    display: none !important;
+}
+
+html.sb-collapsed .sidebar-notif-btn {
+    justify-content: center;
+    padding: 0 !important;
+}
+
+html.sb-collapsed .sidebar-notif-text {
+    display: none;
+}
+
+html.sb-collapsed .sidebar-notif-count {
+    position: absolute;
+    top: 4px;
+    right: 14px;
+    min-width: 8px;
+    height: 8px;
+    padding: 0;
+    font-size: 0;
+}
+
+.sidebar-notif-btn {
+    position: relative;
+}
+
+/* Desktop uses the in-sidebar entry; the floating mobile bar is for phones. */
+@media (min-width: 992px) {
+    .mobile-topbar {
+        display: none !important;
+    }
+
+    .admin-topbar-notif-wrap {
+        display: none !important;
+    }
+}
+
+.sidebar-logout-btn {
+    min-height: 40px !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: #94A3B8 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    box-shadow: none !important;
+}
+
+.sidebar-logout-btn:hover {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.22) !important;
+    color: #FCA5A5 !important;
+    box-shadow: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   SMALL SHARED PIECES
+   -------------------------------------------------------------------------- */
+.status-box {
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    border: 1px solid var(--ui-border) !important;
+    background: var(--ui-surface-2) !important;
+}
+
+.status-box.status-box-success {
+    border-color: rgba(16, 185, 129, 0.25) !important;
+    background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.status-box-title {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+}
+
+.status-box-subtitle {
+    font-size: 0.8125rem !important;
+    color: var(--ui-muted) !important;
+}
+
+.alert {
+    border-radius: 12px !important;
+    border: 1px solid transparent !important;
+    padding: 12px 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+}
+
+.alert-success { background: rgba(16, 185, 129, 0.1) !important; color: #A7F3D0 !important; border-color: rgba(16, 185, 129, 0.22) !important; }
+.alert-danger  { background: rgba(239, 68, 68, 0.1) !important;  color: #FECACA !important; border-color: rgba(239, 68, 68, 0.22) !important; }
+.alert-warning { background: rgba(245, 158, 11, 0.1) !important; color: #FDE68A !important; border-color: rgba(245, 158, 11, 0.22) !important; }
+.alert-info    { background: rgba(59, 130, 246, 0.1) !important; color: #BFDBFE !important; border-color: rgba(59, 130, 246, 0.22) !important; }
+
+.modal-header,
+.modal-footer {
+    padding: 16px 20px !important;
+    border-color: var(--ui-border) !important;
+}
+
+.modal-body {
+    padding: 20px !important;
+}
+
+.dropdown-menu {
+    background: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border-strong) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--ui-shadow-lg) !important;
+    padding: 6px !important;
+}
+
+.dropdown-item {
+    border-radius: 8px !important;
+    padding: 8px 10px !important;
+    font-size: 0.875rem !important;
+    color: var(--ui-text) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #FFFFFF !important;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid var(--ui-border) !important;
+    gap: 4px;
+}
+
+.nav-tabs .nav-link {
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    padding: 10px 14px !important;
+    font-size: 0.875rem !important;
+    font-weight: 500;
+    color: var(--ui-muted) !important;
+}
+
+.nav-tabs .nav-link.active {
+    background: transparent !important;
+    border-bottom-color: var(--ui-primary) !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   DASHBOARD COMPOSITION
+   -------------------------------------------------------------------------- */
+.dashboard-kpi-row .stat-card-pastel {
+    min-height: 148px !important;
+    border-radius: var(--ui-radius) !important;
+    background: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border) !important;
+    box-shadow: none !important;
+}
+
+.dashboard-kpi-row .stat-card-pastel:hover {
+    transform: none !important;
+    background: #121D33 !important;
+    border-color: rgba(129, 140, 248, 0.28) !important;
+    box-shadow: none !important;
+}
+
+.dashboard-kpi-row .card-body.stat-card {
+    min-height: 148px !important;
+    padding: 18px 20px !important;
+    gap: 12px !important;
+}
+
+.dashboard-kpi-row .stat-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 12px !important;
+    font-size: 1.15rem !important;
+}
+
+.dashboard-kpi-row .stat-card-pastel:hover .stat-icon {
+    transform: none !important;
+}
+
+.dashboard-kpi-row .stat-label {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.8125rem !important;
+    font-weight: 550 !important;
+    color: var(--ui-muted) !important;
+    letter-spacing: 0;
+}
+
+.dashboard-kpi-row .stat-value {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: clamp(1.55rem, 1.9vw, 1.95rem) !important;
+    font-weight: 650 !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.12 !important;
+}
+
+.dashboard-kpi-row .stat-note {
+    padding: 2px 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    font-size: 0.78rem !important;
+    color: var(--ui-subtle) !important;
+}
+
+.dashboard-kpi-row .pastel-green .stat-note,
+.dashboard-kpi-row .pastel-blue .stat-note,
+.dashboard-kpi-row .pastel-amber .stat-note,
+.dashboard-kpi-row .pastel-red .stat-note {
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--ui-subtle) !important;
+}
+
+.dashboard-revenue-card {
+    min-height: 0 !important;
+}
+
+.dashboard-revenue-chart {
+    height: 300px !important;
+}
+
+.dashboard-feature-row .card,
+.dashboard-detail-row .card {
+    border-radius: var(--ui-radius) !important;
+    background: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border) !important;
+    box-shadow: none !important;
+}
+
+.dashboard-feature-row .card-body,
+.dashboard-detail-row .card-body {
+    padding: 20px 22px !important;
+}
+
+.dashboard-feature-row h2,
+.dashboard-detail-row h2 {
+    font-size: 1.06rem !important;
+    font-weight: 650 !important;
+}
+
+.dashboard-feature-row p,
+.dashboard-detail-row p {
+    font-size: 0.85rem !important;
+    color: var(--ui-muted) !important;
+}
+
+/* Quick actions: neutral surface, colour only on the icon */
+.dashboard-quick-action,
+.dashboard-quick-action:nth-of-type(1),
+.dashboard-quick-action:nth-of-type(2),
+.dashboard-quick-action:nth-of-type(3) {
+    min-height: 64px !important;
+    padding: 12px 14px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: var(--ui-surface-2) !important;
+    box-shadow: none !important;
+    color: #FFFFFF !important;
+}
+
+.dashboard-quick-action:hover {
+    transform: none !important;
+    background: #13203A !important;
+    border-color: rgba(129, 140, 248, 0.25) !important;
+    box-shadow: none !important;
+}
+
+.dashboard-quick-action .dashboard-action-icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 1.05rem !important;
+}
+
+.dashboard-quick-action .fw-semibold {
+    font-size: 0.9rem !important;
+}
+
+.dashboard-quick-action .bi-chevron-right {
+    color: var(--ui-subtle) !important;
+}
+
+.dashboard-follow-up,
+.dashboard-upcoming {
+    min-height: 0 !important;
+}
+
+.dashboard-upcoming-empty {
+    min-height: 96px !important;
+    border: 1px dashed var(--ui-border-strong) !important;
+    border-radius: 12px !important;
+    color: var(--ui-subtle) !important;
+    font-size: 0.85rem;
+}
+
+.tx-row {
+    padding: 12px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.045) !important;
+}
+
+/* Compact row actions (homeowners / payments tables) — dark, not pastel */
+.homeowner-actions .homeowner-action-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.homeowner-action-view {
+    background: rgba(59, 130, 246, 0.14) !important;
+    color: #93C5FD !important;
+    border-color: rgba(59, 130, 246, 0.24) !important;
+}
+
+.homeowner-action-edit {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #FCD34D !important;
+    border-color: rgba(245, 158, 11, 0.24) !important;
+}
+
+.homeowner-action-review {
+    background: rgba(245, 158, 11, 0.12) !important;
+    color: #FCD34D !important;
+    border-color: rgba(245, 158, 11, 0.24) !important;
+}
+
+.homeowner-action-archive {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #CBD5E1 !important;
+    border-color: var(--ui-border-strong) !important;
+}
+
+.homeowner-actions .homeowner-action-btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    filter: brightness(1.15);
+}
+
+/* --------------------------------------------------------------------------
+   ANALYTICS KPIs — match the dashboard cards instead of the old green well
+   -------------------------------------------------------------------------- */
+.an-kpi {
+    padding: 0 !important;
+    min-height: 0 !important;
+    background: var(--ui-surface) !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius) !important;
+}
+
+.an-kpi .title-card {
+    min-height: 0 !important;
+    padding: 15px 18px 0 !important;
+    color: var(--ui-muted) !important;
+}
+
+.an-kpi .l {
+    color: var(--ui-muted) !important;
+    font-size: 0.8rem !important;
+    font-weight: 550 !important;
+    text-shadow: none !important;
+}
+
+.an-kpi .card-content {
+    padding: 5px 18px 16px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    color: var(--ui-text) !important;
+    gap: 4px !important;
+}
+
+.an-kpi strong {
+    font-size: clamp(1.5rem, 1.8vw, 1.85rem) !important;
+}
+
+.an-kpi-sub,
+.an-kpi-sub small {
+    color: var(--ui-subtle) !important;
+    font-size: 0.78rem !important;
+}
+
+.tx-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 0.9rem !important;
+}
+
+/* --------------------------------------------------------------------------
+   AUTH PAGES (password reset / OTP use a simple .login-card)
+   -------------------------------------------------------------------------- */
+.login-page {
+    background: var(--ui-bg) !important;
+}
+
+.login-card {
+    width: min(440px, calc(100vw - 32px)) !important;
+    max-width: 440px !important;
+    margin: 8vh auto !important;
+    padding: 30px 28px !important;
+    border: 1px solid var(--ui-border) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    background: var(--ui-surface) !important;
+    box-shadow: var(--ui-shadow-lg) !important;
+    color: var(--ui-text) !important;
+}
+
+.login-card .login-logo {
+    display: none !important;
+}
+
+/* Same 4B mark used by the sidebar and the split-screen login */
+.login-card::before {
+    content: "4B";
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 14px;
+    border-radius: 12px;
+    background: #818CF8;
+    color: #070C18;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.login-card .form-label {
+    text-transform: none !important;
+    font-size: 0.8125rem !important;
+    letter-spacing: 0 !important;
+    color: var(--ui-muted) !important;
+}
+
+.login-card h1,
+.login-card h2 {
+    font-size: 1.35rem !important;
+    font-weight: 650 !important;
+    color: #FFFFFF !important;
+    margin-bottom: 4px !important;
+}
+
+.login-card .login-subtitle {
+    font-size: 0.875rem !important;
+    color: var(--ui-muted) !important;
+    line-height: 1.55;
+}
+
+.login-card .btn {
+    width: 100%;
+}
+
+/* Split-screen shell: keep its identity, calm the shadows */
+.login-shell-card {
+    border-radius: var(--ui-radius-lg) !important;
+    border: 1px solid var(--ui-border) !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45) !important;
+    overflow: hidden;
+}
+
+.login-shell h1 {
+    font-size: clamp(1.6rem, 2.4vw, 2.1rem) !important;
+    font-weight: 650 !important;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .main-content {
+        padding: 4.6rem 16px 32px !important;
+    }
+
+    .page-header {
+        align-items: flex-start !important;
+        margin-bottom: 18px !important;
+    }
+
+    .page-header .btn,
+    .page-header .d-flex {
+        flex-wrap: wrap;
+    }
+
+    /* A pinned action column covers the middle columns once the table is wider
+       than the phone. Let the whole table scroll instead. */
+    .table-responsive.homeowners-table-wrap .table th:last-child,
+    .table-responsive.homeowners-table-wrap .table td:last-child,
+    .table-responsive .admin-payments-table th:last-child,
+    .table-responsive .admin-payments-table td:last-child,
+    .table-responsive .admin-reservations-table th:last-child,
+    .table-responsive .admin-reservations-table td:last-child,
+    .table-responsive .admin-feedback-table th:last-child,
+    .table-responsive .admin-feedback-table td:last-child {
+        position: static !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        border-left: 0 !important;
+    }
+
+    .main-content .table-responsive.homeowners-table-wrap > .table {
+        min-width: 880px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    body {
+        font-size: 14px !important;
+    }
+
+    .main-content .page-header h1,
+    .page-header h1 {
+        font-size: 1.35rem !important;
+    }
+
+    .page-header p {
+        font-size: 0.85rem !important;
+    }
+
+    .card-body {
+        padding: 16px !important;
+    }
+
+    .card-header {
+        padding: 12px 16px !important;
+    }
+
+    .card h2,
+    .dashboard-feature-row h2 {
+        font-size: 1rem !important;
+    }
+
+    .table thead th {
+        padding: 10px 12px !important;
+    }
+
+    .table tbody td {
+        padding: 11px 12px !important;
+        font-size: 0.84rem !important;
+    }
+
+    .dashboard-kpi-row .card-body.stat-card {
+        padding: 14px 16px !important;
+        min-height: 128px !important;
+    }
+
+    .dashboard-kpi-row .stat-card-pastel {
+        min-height: 128px !important;
+    }
+
+    .dashboard-revenue-chart {
+        height: 240px !important;
+    }
+
+    .modal-body {
+        padding: 16px !important;
+    }
+
+    .login-card {
+        margin: 5vh auto !important;
+        padding: 24px 20px !important;
+    }
+}
+
+@media (max-width: 479.98px) {
+    .page-header > .d-flex,
+    .page-header > div:last-child:not(:first-child) {
+        width: 100%;
+    }
+
+    .page-header .btn {
+        flex: 1 1 auto;
+    }
+}
+
+@media (hover: none) {
+    .card.hover-lift:hover,
+    .dashboard-kpi-row .stat-card-pastel:hover,
+    .dashboard-quick-action:hover {
+        transform: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}

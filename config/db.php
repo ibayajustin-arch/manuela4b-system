@@ -1,11 +1,25 @@
 <?php
 
-$host = "localhost";
-$username = "root";
-$password = "";
-$database = "manuela4b_mis";
+$httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$hostOnly = explode(':', $httpHost)[0];
+$isLocal = in_array($hostOnly, ['localhost', '127.0.0.1', '::1'], true) || (php_sapi_name() === 'cli' && empty($_SERVER['HTTP_HOST']));
 
-$conn = mysqli_connect(
+if ($isLocal) {
+    $host     = "localhost";
+    $username = "root";
+    $password = "";
+    $database = "manuela4b_mis";
+} else {
+    // InfinityFree Live Hosting
+    $host     = "sql201.infinityfree.com";
+    $username = "if0_43275271";
+    $password = "4JpHeM0gdIM4ZHX";
+    $database = "if0_43275271_manuela4b";
+}
+
+mysqli_report(MYSQLI_REPORT_OFF);
+
+$conn = @mysqli_connect(
     $host,
     $username,
     $password,  
@@ -13,7 +27,12 @@ $conn = mysqli_connect(
 );
 
 if (!$conn) {
-    die("Database connection failed: " . mysqli_connect_error());
+    error_log('Database connection failed: ' . mysqli_connect_error());
+    http_response_code(503);
+    die("<div style='font-family:sans-serif;padding:24px;background:#1e1e2f;color:#fff;border-radius:8px;max-width:600px;margin:40px auto;'>"
+        . "<h2 style='color:#f87171;'>Service temporarily unavailable</h2>"
+        . "<p>Please try again later.</p>"
+        . "</div>");
 }
 
 ?>

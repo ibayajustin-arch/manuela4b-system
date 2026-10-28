@@ -2,13 +2,17 @@
 require_once '../config/init.php';
 require_once '../config/db.php';
 require_once '../config/paymongo.php';
+require_once '../includes/payment_guard.php';
+require_once '../includes/homeowner_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
     header("Location: ../login.php");
     exit;
 }
 
-// Find the homeowner record linked to this login account
+// Email OTP required before paying
+require_pay_verified('create_checkout.php');
+
 $user_id = $_SESSION['user_id'];
 $homeowner = null;
 try {
@@ -28,11 +32,40 @@ if (!$homeowner) {
     exit;
 }
 
-$amount_php = (float) $homeowner['monthly_due'];
-$period_label = date('F Y');
+$requested_period = trim($_GET['period'] ?? '');
+if (preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $requested_period)) {
+    $period_covered = $requested_period;
+} else {
+    $period_covered = date('Y-m');
+}
+$period_label = date('F Y', strtotime($period_covered . '-01'));
 $description = "Monthly Dues ({$period_label})";
+$monthly_due = (float) (!empty($homeowner['monthly_due']) && $homeowner['monthly_due'] > 0 ? $homeowner['monthly_due'] : MONTHLY_DUES_AMOUNT);
 
-// PayMongo requires amount in centavos (smallest currency unit)
+$duesStartYm = homeowner_dues_start_ym($homeowner);
+$currentPeriod = date('Y-m');
+if ($period_covered < $duesStartYm || $period_covered > $currentPeriod) {
+    $_SESSION['error_msg'] = $period_covered < $duesStartYm
+        ? 'Your monthly dues begin in ' . date('F Y', strtotime($duesStartYm . '-01')) . '.'
+        : 'Payment for a future month is not available yet.';
+    header('Location: payments.php');
+    exit;
+}
+
+// Don't create a checkout if this month is already paid
+$stmt = $conn->prepare("SELECT COALESCE(SUM(amount_paid), 0) AS paid_amount FROM payments WHERE homeowner_id = ? AND period_covered = ? AND archived_at IS NULL");
+$stmt->bind_param("is", $homeowner['id'], $period_covered);
+$stmt->execute();
+$paid_amount = (float) ($stmt->get_result()->fetch_assoc()['paid_amount'] ?? 0);
+$stmt->close();
+
+if ($paid_amount >= $monthly_due) {
+    $_SESSION['flash_success'] = "Your dues for {$period_label} are already paid.";
+    header("Location: payments.php");
+    exit;
+}
+
+$amount_php = max(0, $monthly_due - $paid_amount);
 $amount_centavos = (int) round($amount_php * 100);
 
 $payload = [
@@ -53,9 +86,13 @@ $payload = [
                     "quantity" => 1
                 ]
             ],
-            "payment_method_types" => ["gcash", "paymaya", "card"],
-            "success_url" => "http://localhost/MANUELA/resident/payment_success.php",
-            "cancel_url" => "http://localhost/MANUELA/resident/payments.php",
+            "payment_method_types" => ["gcash", "paymaya"],
+            "success_url" => BASE_URL . "/resident/payment_success.php",
+            "cancel_url" => BASE_URL . "/resident/payments.php",
+            "metadata" => [
+                "homeowner_id" => (string) $homeowner['id'],
+                "period_covered" => $period_covered,
+            ],
         ]
     ]
 ];
@@ -87,8 +124,10 @@ if ($http_code === 200 && isset($result['data']['attributes']['checkout_url'])) 
     $_SESSION['paymongo_checkout_id'] = $result['data']['id'];
     $_SESSION['paymongo_amount'] = $amount_php;
     $_SESSION['paymongo_description'] = $description;
-    $_SESSION['paymongo_period'] = date('Y-m');
+    $_SESSION['paymongo_period'] = $period_covered;
     $_SESSION['paymongo_homeowner_id'] = $homeowner['id'];
+
+    pay_consume();   // this verification is used up; the next payment needs a new code
 
     header("Location: " . $result['data']['attributes']['checkout_url']);
     exit;

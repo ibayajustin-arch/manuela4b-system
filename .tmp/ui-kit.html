@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Kit Preview</title>
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/global.css">
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/components.css">
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/admin.css">
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/resident.css">
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/reference-theme.css">
+<link rel="stylesheet" href="file:///C:/xampp/htdocs/Manuela/Assets/css/ui-refresh.css">
+<style>
+  /* Minimal stand-ins for Bootstrap grid utilities used by the real pages */
+  .row { display: flex; flex-wrap: wrap; gap: 20px; }
+  .row > * { flex: 0 0 calc(25% - 15px); min-width: 0; }
+  .g-4 { gap: 20px; }
+  .split { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+  @media (max-width: 1100px) { .row > * { flex-basis: calc(50% - 10px); } .split { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .row > * { flex-basis: 100%; } }
+  .d-flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .align-items-center { align-items: center; }
+  .justify-content-between { justify-content: space-between; }
+  .mb-3 { margin-bottom: 16px; }
+  .mb-4 { margin-bottom: 24px; }
+  .w-100 { width: 100%; }
+  .h5 { font-size: 1.05rem; margin: 0 0 6px; }
+  .text-muted { color: var(--ui-muted); }
+  .small { font-size: .82rem; }
+  .list-unstyled { list-style: none; margin: 0; padding: 0; }
+  .preview-sidebar { width: 260px; flex: 0 0 260px; }
+  .preview-main { flex: 1; min-width: 0; }
+  .mobile-frame { width: 390px; }
+</style>
+</head>
+<body style="padding:0">
+<div class="app-wrapper">
+  <aside class="sidebar preview-sidebar d-flex flex-column">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-content">
+        <div class="sidebar-logo-box"></div>
+        <div class="sidebar-brand-text">
+          <span class="brand-name">Manuela 4B</span>
+          <span class="brand-tag">HOA Management</span>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="sidebar-section-label"><span>Navigation</span></div>
+      <ul class="nav flex-column list-unstyled">
+        <li><a class="nav-link active" href="#"><i>&#9638;</i><span class="nav-text">Dashboard</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#9636;</i><span class="nav-text">Analytics</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#9783;</i><span class="nav-text">Reservations</span><span class="sidebar-badge badge-warning">3</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#128101;</i><span class="nav-text">Homeowners</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#128196;</i><span class="nav-text">Payments</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#9993;</i><span class="nav-text">Announcements</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#128172;</i><span class="nav-text">Resident Feedback</span></a></li>
+        <li><a class="nav-link" href="#"><i>&#9881;</i><span class="nav-text">Settings</span></a></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <button type="button" class="sidebar-notif-btn">
+        <i>&#128276;</i><span class="sidebar-notif-text">Notifications</span><span class="sidebar-notif-count">4</span>
+      </button>
+      <div class="sidebar-user d-flex align-items-center gap-2">
+        <div class="avatar-circle sm">A</div>
+        <div class="sidebar-user-text">
+          <p class="sidebar-user-name mb-0">Admin User</p>
+          <span class="sidebar-role-pill">ADMIN</span>
+        </div>
+      </div>
+      <a href="#" class="sidebar-logout-btn"><i>&#9099;</i><span class="nav-text">Log Out</span></a>
+    </div>
+  </aside>
+
+  <main class="main-content preview-main">
+    <div class="page-header">
+      <div>
+        <h1>Homeowners</h1>
+        <p>Manage verified accounts, dues standing, and street assignments.</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="#" class="btn btn-outline-secondary">Archives</a>
+        <a href="#" class="btn btn-primary">Add Homeowner</a>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div><div class="card"><div class="card-body">
+        <p class="text-muted small mb-1">Total Homeowners</p>
+        <div style="font:650 1.9rem Poppins;letter-spacing:-.03em;color:#fff">128</div>
+        <p class="small text-muted mb-0">4 awaiting verification</p>
+      </div></div></div>
+      <div><div class="card"><div class="card-body">
+        <p class="text-muted small mb-1">Pending Reservations</p>
+        <div style="font:650 1.9rem Poppins;letter-spacing:-.03em;color:#fff">3</div>
+        <p class="small text-muted mb-0">Waiting for approval</p>
+      </div></div></div>
+      <div><div class="card"><div class="card-body">
+        <p class="text-muted small mb-1">Revenue This Month</p>
+        <div style="font:650 1.9rem Poppins;letter-spacing:-.03em;color:#fff">&#8369;24,500</div>
+        <p class="small text-muted mb-0">&#8593; 12% vs last month</p>
+      </div></div></div>
+      <div><div class="card"><div class="card-body">
+        <p class="text-muted small mb-1">Pending Dues</p>
+        <div style="font:650 1.9rem Poppins;letter-spacing:-.03em;color:#fff">&#8369;8,400</div>
+        <p class="small text-muted mb-0">6 unpaid accounts</p>
+      </div></div></div>
+    </div>
+
+    <div class="split mb-4">
+      <div><div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div><h2>Homeowners</h2><p class="small text-muted mb-0">Verified accounts and their standing</p></div>
+            <span class="badge badge-success">Active</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table">
+              <thead><tr><th>Name</th><th>Street</th><th>Status</th><th>Balance</th><th></th></tr></thead>
+              <tbody>
+                <tr><td>Maria Santos</td><td>Acacia</td><td><span class="badge badge-success">Paid</span></td><td>&#8369;0.00</td><td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td></tr>
+                <tr><td>Jose Reyes</td><td>Bamboo</td><td><span class="badge badge-warning">Partial</span></td><td>&#8369;1,200.00</td><td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td></tr>
+                <tr><td>Ana Cruz</td><td>Camia</td><td><span class="badge badge-danger">2 months behind</span></td><td>&#8369;2,400.00</td><td><a href="#" class="btn btn-sm btn-outline-secondary">View</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div></div>
+
+      <div><div class="card"><div class="card-body">
+        <h2 class="mb-3">Filter</h2>
+        <div class="mb-3">
+          <label class="form-label" for="q">Search</label>
+          <input class="form-control" id="q" placeholder="Name, email, or phone">
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="s">Street</label>
+          <select class="form-select" id="s"><option>All streets</option><option>Acacia</option></select>
+        </div>
+        <button class="btn btn-primary w-100">Apply filters</button>
+      </div></div></div>
+    </div>
+
+    <div class="card"><div class="card-body">
+      <h2 class="mb-3">Actions</h2>
+      <div class="d-flex gap-2" style="flex-wrap:wrap">
+        <button class="btn btn-primary">Save changes</button>
+        <button class="btn btn-outline-primary">Export CSV</button>
+        <button class="btn btn-outline-secondary">Cancel</button>
+        <button class="btn btn-success">Approve</button>
+        <button class="btn btn-outline-danger">Decline</button>
+        <span class="badge badge-success">Paid</span>
+        <span class="badge badge-warning">Pending</span>
+        <span class="badge badge-danger">Overdue</span>
+        <span class="badge badge-info">New</span>
+        <span class="badge badge-neutral">Archived</span>
+      </div>
+    </div></div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Manuela 4B MIS - Root Apache Configuration
+DirectoryIndex index.php login.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS in production
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Case normalization
+    RewriteRule ^Admin/(.*)$ admin/$1 [NC,L]
+    RewriteRule ^assets/(.*)$ Assets/$1 [NC,L]
+</IfModule>
+

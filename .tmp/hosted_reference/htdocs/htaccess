@@ -1,0 +1,20 @@
+# Manuela 4B MIS - Root Apache Configuration
+DirectoryIndex index.php login.php index.html
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS in production
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # If the exact file exists, serve it and skip every rule below (prevents rewrite loops)
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Folder case normalization for Linux hosting (admin -> Admin, assets -> Assets)
+    # Files inside Admin/ are lowercase on the server (dashboard.php, homeowners.php, ...)
+    RewriteRule ^admin/(.*)$  Admin/$1  [NC,L]
+    RewriteRule ^assets/(.*)$ Assets/$1 [NC,L]
+</IfModule>

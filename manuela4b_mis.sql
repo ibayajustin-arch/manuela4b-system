@@ -46,7 +46,8 @@ CREATE TABLE `announcements` (
   `title` varchar(150) NOT NULL,
   `message` text NOT NULL,
   `created_by` int(11) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `archived_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -65,9 +66,13 @@ CREATE TABLE `homeowners` (
   `address` varchar(150) DEFAULT NULL,
   `contact` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `monthly_due` decimal(10,2) DEFAULT 500.00,
+  `monthly_due` decimal(10,2) DEFAULT 250.00,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `status` varchar(50) NOT NULL DEFAULT 'Active'
+  `status` varchar(50) NOT NULL DEFAULT 'Active',
+  `verification_id_path` varchar(255) DEFAULT NULL,
+  `verification_id_back_path` varchar(255) DEFAULT NULL,
+  `archived_at` datetime DEFAULT NULL,
+  `archived_status` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -104,7 +109,8 @@ CREATE TABLE `payments` (
   `payment_method` varchar(30) DEFAULT NULL,
   `collector_id` int(11) DEFAULT NULL,
   `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `archived_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -116,7 +122,7 @@ INSERT INTO `payments` (`id`, `homeowner_id`, `amount_paid`, `payment_date`, `pe
 (3, 3, 250.00, '0000-00-00', '2026-03', 'RCP-00003', NULL, 2, NULL, '2026-03-26 12:48:35'),
 (4, 1, 500.00, '2026-04-02', '2026-04', 'RCP-00004', NULL, 2, NULL, '2026-03-26 12:48:35'),
 (5, 1, 500.00, '2026-08-29', '2026-08', 'PM-E50DC742', NULL, NULL, 'Paid online via PayMongo (Succeeded)', '2026-08-29 06:37:44'),
-(6, 13, 500.00, '2026-08-30', '2026-08', 'PM-14659662', 'Online', NULL, 'Paid online via PayMongo (Online)', '2026-08-29 21:05:41');
+(6, 13, 500.00, '2026-08-30', '2026-08', 'PM-14659662', 'Unknown', NULL, 'Paid online via PayMongo; provider not recorded', '2026-08-29 21:05:41');
 
 -- --------------------------------------------------------
 

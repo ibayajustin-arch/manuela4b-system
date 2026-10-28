@@ -1,0 +1,699 @@
+/* ========================================================
+   RESIDENT STYLES (Login page + resident-specific views)
+   Manuela Orange, Green & White Theme
+   ======================================================== */
+
+/* --- LOGIN PAGE --- */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-color);
+    padding: var(--space-4);
+}
+
+.login-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-6);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.login-logo {
+    width: 56px;
+    height: 56px;
+    max-width: 56px;
+    max-height: 56px;
+    object-fit: contain;
+    margin: 0 auto var(--space-3);
+    display: block;
+}
+
+.login-card h1,
+.login-card h4 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-1);
+    color: var(--text-heading);
+}
+
+.login-card .login-subtitle {
+    color: var(--text-muted);
+    margin-bottom: var(--space-5);
+}
+
+.login-card .form-label {
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-align: left;
+    display: block;
+    color: var(--text-subtle);
+}
+
+.login-card form {
+    text-align: left;
+}
+
+.password-field {
+    position: relative;
+}
+
+.password-field .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-subtle);
+    cursor: pointer;
+}
+
+.login-card .btn-primary {
+    width: 100%;
+    padding: 0.7rem;
+    margin-top: var(--space-2);
+}
+
+.demo-credentials {
+    margin-top: var(--space-5);
+    background-color: var(--surface-color-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+.demo-credentials strong {
+    display: block;
+    color: var(--text-heading);
+    margin-bottom: 2px;
+}
+
+.demo-credentials span {
+    color: var(--text-muted);
+}
+
+/* Admin / Resident role toggle on the login page */
+.role-toggle {
+    display: flex;
+    background-color: var(--surface-color-alt);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    gap: 4px;
+}
+
+.role-toggle-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 0.55rem 0.6rem;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: background-color var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.role-toggle-btn.active {
+    background-color: var(--primary-color);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.35);
+    border: none;
+}
+
+.role-toggle-btn:hover:not(.active) {
+    color: var(--text-heading);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* --- RESIDENT PAYMENTS PAGE --- */
+.resident-payments-page .payment-page-header h2,
+.resident-payments-page .payment-history-heading {
+    color: var(--text-heading);
+}
+
+.resident-payments-page .payment-balance-card {
+    min-height: 246px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: var(--text-heading);
+    background: var(--surface-color) !important;
+}
+
+.resident-payments-page .payment-balance-card::before,
+.resident-payments-page .payment-balance-card::after {
+    display: none;
+}
+
+.resident-payments-page .payment-balance-value {
+    margin: auto 0;
+    color: var(--text-heading);
+    font-size: clamp(1.9rem, 2.5vw, 2.65rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+}
+
+.resident-payments-page .payment-balance-note {
+    margin: -0.65rem 0 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+}
+
+.resident-payments-page .payment-next-due {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-color-soft);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.resident-payments-page .payment-next-due strong {
+    color: var(--text-heading);
+    white-space: nowrap;
+}
+
+.resident-payments-page .payment-pay-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    padding: 0.55rem;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.resident-payments-page .payment-pay-cta:hover {
+    color: var(--primary-hover);
+}
+
+.resident-payments-page .stat-card {
+    min-height: 246px;
+    padding: 1.5rem !important;
+    gap: 0.75rem;
+    justify-content: flex-start;
+}
+
+.resident-payments-page .stat-card .stat-value {
+    font-size: clamp(1.5rem, 2vw, 1.9rem);
+}
+
+.resident-payments-page .payment-history-table th {
+    padding: 0.85rem 0.75rem;
+    color: var(--text-heading) !important;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.035em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.resident-payments-page .payment-history-table td {
+    padding: 0.85rem 0.75rem;
+}
+
+.resident-payments-page .payment-history-table .table-empty-state {
+    padding: 1.1rem;
+    color: var(--text-muted) !important;
+    text-align: center;
+}
+
+.payment-history-table td,
+.payment-history-table th {
+    white-space: nowrap;
+}
+
+.payment-history-table th {
+    background-color: var(--surface-color);
+    color: var(--text-heading) !important;
+}
+
+.payment-history-table td {
+    border-color: var(--border-color-soft) !important;
+    color: var(--text-main) !important;
+}
+
+.btn-cta-light {
+    background-color: #ffffff !important;
+    color: var(--primary-color) !important;
+    border: none;
+}
+
+.btn-cta-light:hover {
+    background-color: #f1f5f9 !important;
+    color: var(--primary-hover) !important;
+}
+
+/* Balance / account-status card */
+.balance-card {
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    border-radius: var(--radius-lg);
+}
+
+.balance-card-pending {
+    background: linear-gradient(135deg, #1a7a42 0%, #14532D 100%) !important;
+}
+
+.balance-card-success {
+    background: linear-gradient(135deg, var(--success-color) 0%, #166534 100%) !important;
+}
+
+.balance-card::before,
+.balance-card::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+.balance-card::before {
+    width: 160px;
+    height: 160px;
+    top: -60px;
+    right: -40px;
+}
+
+.balance-card::after {
+    width: 90px;
+    height: 90px;
+    bottom: -30px;
+    right: 50px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.balance-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.balance-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+@media (max-width: 575.98px) {
+    .resident-payments-page .payment-balance-card,
+    .resident-payments-page .stat-card {
+        min-height: 210px;
+    }
+
+    .resident-payments-page .payment-balance-card {
+        padding: 1.25rem;
+    }
+
+    .resident-payments-page .stat-card {
+        padding: 1.15rem !important;
+    }
+}
+
+/* --- PROFILE PHOTO UPLOAD --- */
+.avatar-upload-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 0 auto var(--space-3);
+}
+
+.avatar-upload-wrapper .avatar-circle {
+    margin: 0;
+}
+
+.avatar-circle-photo {
+    overflow: hidden;
+    padding: 0;
+}
+
+.avatar-circle-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border: 2px solid var(--surface-color);
+    transition: background-color var(--transition-fast);
+}
+
+.avatar-edit-btn:hover {
+    background: var(--primary-hover);
+}
+
+/* ========================================================
+   LOGIN / REGISTER SHELL (split-screen, bordered card)
+   New layout based on provided reference image, using the
+   current purple brand colors.
+   ======================================================== */
+.login-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color);
+    padding: var(--space-5);
+}
+
+.login-shell-card {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 640px;
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+/* --- LEFT: form side --- */
+.login-left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-6);
+}
+
+.login-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.login-brand-row img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.login-brand-row span {
+    font-weight: 700;
+    color: var(--text-heading);
+    font-size: 1.05rem;
+}
+
+.login-left-inner {
+    max-width: 360px;
+    margin: 0 auto;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-left-inner h1 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+}
+
+.login-left-inner .login-subtitle {
+    margin-bottom: var(--space-5);
+    text-align: left;
+}
+
+.login-left-inner form {
+    text-align: left;
+}
+
+.login-footer-note {
+    font-size: 0.75rem;
+    color: var(--text-subtle);
+    text-align: center;
+}
+
+.login-footer-note a {
+    color: var(--text-subtle);
+    text-decoration: underline;
+}
+
+/* --- RIGHT: branding / preview side --- */
+.login-right-panel {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-6);
+    color: #fff;
+}
+
+.login-right-panel::before,
+.login-right-panel::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+
+.login-right-panel::before {
+    width: 320px;
+    height: 320px;
+    top: -100px;
+    right: -100px;
+}
+
+.login-right-panel::after {
+    width: 220px;
+    height: 220px;
+    bottom: -80px;
+    left: -60px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.login-right-panel h2 {
+    color: #fff;
+    font-size: 1.7rem;
+    max-width: 380px;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.login-right-panel .login-hero-subtitle {
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 360px;
+    text-align: left;
+    margin-bottom: var(--space-5);
+    position: relative;
+    z-index: 1;
+}
+
+/* Decorative floating "dashboard preview" card */
+.login-preview-card {
+    position: relative;
+    z-index: 1;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: var(--space-4);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+    max-width: 340px;
+}
+
+.login-preview-stats {
+    display: flex;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.login-preview-stat {
+    flex: 1;
+    background: var(--bg-color);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.login-preview-stat .label {
+    font-size: 0.63rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.login-preview-stat .value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-heading);
+}
+
+.login-preview-donut-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.login-preview-donut {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary-color) 0% 78%, #D4CFC6 78% 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-preview-donut-inner {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-heading);
+}
+
+.login-preview-caption .label {
+    font-size: 0.63rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    display: block;
+}
+
+.login-preview-caption .value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-heading);
+}
+
+@media (max-width: 767.98px) {
+    .login-shell {
+        padding: 0;
+    }
+
+    .login-shell-card {
+        border-radius: 0;
+        min-height: 100vh;
+        box-shadow: none;
+    }
+
+    .login-right-panel {
+        display: none;
+    }
+}
+
+/* Green balance card */
+.resident-payments-page .payment-balance-card {
+    background: linear-gradient(135deg, #1a7a42 0%, #14532D 100%) !important;
+    color: #fff;
+}
+.resident-payments-page .payment-balance-card::before,
+.resident-payments-page .payment-balance-card::after { display: block; }
+.resident-payments-page .payment-balance-value,
+.resident-payments-page .payment-next-due strong { color: #fff; }
+.resident-payments-page .payment-balance-note,
+.resident-payments-page .payment-next-due {
+    color: rgba(255, 255, 255, .85);
+    border-top-color: rgba(255, 255, 255, .25);
+}
+.resident-payments-page .payment-pay-cta { color: #fff; }
+.resident-payments-page .payment-pay-cta:hover { color: #fff; opacity: .9; }
+
+.avail-range {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+    align-items: end;
+    margin-top: 0.9rem;
+    padding: clamp(0.85rem, 2vw, 1rem);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--surface-color-alt);
+    color: var(--text-main);
+}
+
+.avail-range > div {
+    min-width: 0;
+}
+
+.avail-range label {
+    display: block;
+    margin-bottom: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.avail-range select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+}
+
+.avail-range select:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.avail-range select option {
+    background-color: var(--surface-color-alt);
+    color: var(--text-main);
+}
+
+.avail-summary,
+.avail-range > div:last-child {
+    grid-column: 1 / -1;
+}
+
+.avail-summary {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.avail-summary .fw-semibold {
+    color: var(--text-heading);
+}
+
+.avail-range #availBook {
+    width: 100%;
+    min-height: 42px;
+}
