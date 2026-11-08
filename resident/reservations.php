@@ -385,7 +385,18 @@ require_once '../includes/header.php';
     #bookFacilityModal .modal-footer { flex-shrink: 0; }
 
     /* ---------- Availability calendar ---------- */
-    .avail-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .availability-card { overflow: hidden; border: 1px solid var(--border-color, #d5e0dc); border-radius: 1rem; background: #fff; box-shadow: none; }
+    .availability-card .card-body { padding: clamp(1rem, 3vw, 1.5rem) !important; }
+    .availability-heading { color: var(--text-color, #183b33); }
+    .availability-controls { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; gap: .75rem; max-width: 390px; margin: 0 auto 1rem; }
+    .availability-controls strong { text-align: center; font-size: 1.05rem; letter-spacing: -.02em; }
+    .availability-controls .btn { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid var(--border-color, #d5e0dc); border-radius: .7rem; background: #fff; color: var(--primary-color); box-shadow: none; transition: transform .16s ease, border-color .16s ease, background-color .16s ease; }
+    .availability-controls .btn:hover:not(:disabled) { background: var(--primary-soft, #e1f1ec); border-color: var(--primary-color); }
+    .availability-controls .btn:active:not(:disabled) { transform: translateY(1px); }
+    .availability-controls .btn:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary-color) 45%, white); outline-offset: 3px; }
+    .availability-controls .btn:disabled { opacity: .45; }
+    .availability-facility { min-height: 48px; border: 1px solid var(--border-color, #d5e0dc); border-radius: .7rem; background-color: #fff; color: #183b33; box-shadow: none; }
+    .avail-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; width: 100%; margin-inline: auto; }
     .avail-grid.avail-loading { opacity: .45; pointer-events: none; }
     .avail-grid.avail-loading::after {
         content: '';
@@ -401,14 +412,47 @@ require_once '../includes/header.php';
         animation: loading-spin .7s linear infinite;
         z-index: 1;
     }
-    .avail-grid { position: relative; min-height: 210px; }
-    .avail-dow { text-align: center; font-size: .75rem; font-weight: 600; color: var(--text-muted); padding-bottom: 2px; }
-    .avail-day { border: 2px solid transparent; border-radius: 10px; padding: 10px 0; font-weight: 600; cursor: pointer; }
-    .avail-available { background: #dcf3e6; color: #14532d; }
-    .avail-partial   { background: #fff1c9; color: #92400e; }
-    .avail-full      { background: #fbd9d9; color: #991b1b; }
-    .avail-past      { background: #f1f1f1; color: #b5b5b5; cursor: not-allowed; }
-    .avail-day.selected { border-color: var(--primary-color); }
+    .avail-grid { position: relative; min-height: 430px; }
+    .avail-dow { display: grid; place-items: center; min-height: 42px; color: var(--text-muted, #71827c); font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .avail-day { position: relative; display: grid; place-items: center; min-height: 68px; border: 1px solid #d5e0dc; border-radius: 12px; padding: 0; font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; box-shadow: none; transition: transform .15s ease, border-color .15s ease, background-color .15s ease; }
+    .avail-day:not(:disabled):hover { transform: translateY(-1px); border-color: var(--primary-color); }
+    .avail-day:not(:disabled):active { transform: translateY(1px); }
+    .avail-day:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary-color) 35%, transparent); outline-offset: 2px; }
+    .avail-available { background: #edf7f1; color: #176344; }
+    .avail-partial   { background: #fff6df; color: #8b5a08; }
+    .avail-full      { background: #fcebea; color: #a13e37; }
+    .avail-past      { background: #f5f7f6; color: #a6b0ac; cursor: not-allowed; }
+    .avail-day.selected { border-color: var(--primary-color); background: var(--primary-color); color: #fff; box-shadow: none; }
+    .avail-day.selected:hover { background: var(--primary-hover, #0b5748); }
+    @media (max-width: 767.98px) {
+        .availability-controls { max-width: none; gap: .5rem; }
+        .availability-controls .btn { min-width: 48px; min-height: 48px; }
+        .avail-grid { gap: 4px; min-height: 0; }
+        .avail-day {
+            display: grid;
+            min-width: 0;
+            min-height: 42px;
+            aspect-ratio: 1;
+            place-items: center;
+            padding: 0;
+            border-width: 1px;
+            border-radius: 10px;
+            font-size: .84rem;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+            overflow-wrap: normal;
+            word-break: keep-all;
+            padding-inline: 0 !important;
+            box-shadow: none;
+        }
+        .avail-day:not(:disabled):hover { border-color: var(--primary-color); }
+        .avail-day.selected { box-shadow: none; }
+        .avail-day.selected:hover { background: var(--primary-hover, #0b5748); }
+        .avail-dow { font-size: .62rem; }
+        .avail-legend { justify-content: flex-start; gap: .45rem .75rem; }
+        .avail-range { padding: .8rem; }
+    }
     .avail-legend span { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; font-size: .8rem; }
     .avail-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
     .avail-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
@@ -419,6 +463,93 @@ require_once '../includes/header.php';
     .slot-booked { background: #fbd9d9; color: #991b1b; }
     .slot-mine   { background: #dbeafe; color: #1e40af; }
     .slot-past   { background: #f1f1f1; color: #b5b5b5; }
+    .avail-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1rem; }
+    .avail-legend span { margin: 0; color: var(--text-muted, #687a73); font-size: .76rem; }
+    .avail-legend i { width: 10px; height: 10px; border-radius: 50%; }
+    .availability-hours { margin-inline: auto; text-align: center; }
+    .avail-slots { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); }
+    .slot-chip { min-height: 48px; justify-content: center; border-radius: .75rem; }
+    .slot-free { border-color: #b7dfc7; background: #f3faf6; color: #176344; }
+    .slot-free:hover { background: #e2f3e9; }
+    .slot-booked { background: #fcebea; color: #a13e37; }
+    .slot-mine { background: #e9f1ff; color: #2857a5; }
+    .slot-past { background: #f5f7f6; color: #a6b0ac; }
+    .avail-range { margin: 1rem auto 0; padding: 1rem; border: 1px solid var(--border-color, #e3ebe7); border-radius: .9rem; background: var(--card-bg, #fff); }
+    @media (prefers-reduced-motion: reduce) {
+        .avail-day, .availability-controls .btn { transition: none; }
+    }
+    @media (max-width: 767.98px) {
+        .resident-reservations-table-wrap { overflow: visible !important; }
+        .resident-reservations-table {
+            display: block;
+            width: 100%;
+            min-width: 0 !important;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .resident-reservations-table thead { display: none; }
+        .resident-reservations-table tbody { display: grid; gap: .55rem; }
+        .resident-reservations-table tbody tr.reservation-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .25rem .55rem;
+            padding: .5rem .6rem;
+            border: 1px solid var(--border-color, #dce7e2);
+            border-radius: 12px;
+            background: var(--card-bg, #fff);
+            box-shadow: 0 2px 7px rgba(15, 60, 50, .06);
+        }
+        .resident-reservations-table tbody tr.reservation-row > td {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+            justify-content: center;
+            padding: .25rem .3rem !important;
+            border: 0;
+            font-size: .76rem;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+        .resident-reservations-table tbody tr.reservation-row > td::before {
+            margin-bottom: .15rem;
+            color: var(--text-muted, #687a73);
+            content: '';
+            font-size: .58rem;
+            font-weight: 700;
+            letter-spacing: .04em;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(1)::before { content: 'Facility'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(2)::before { content: 'Date'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(3)::before { content: 'Time'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(4)::before { content: 'Total'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(5)::before { content: 'Payment'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(6)::before { content: 'Status'; }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(7) {
+            grid-column: 1 / -1;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 36px;
+            border-top: 1px solid var(--border-color, #dce7e2);
+        }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(7)::before {
+            margin: 0;
+            content: 'Receipt';
+        }
+        .resident-reservations-table tbody tr.reservation-row .badge { white-space: normal; text-align: left; }
+        .resident-reservations-table tbody tr.reservation-row .btn {
+            width: fit-content;
+            min-height: 34px;
+            margin-top: .3rem !important;
+            padding: .3rem .55rem;
+            font-size: .72rem;
+        }
+        .resident-reservations-table tbody tr.reservation-row > td:nth-child(7) .btn { margin: 0 !important; }
+        .resident-reservations-table tbody tr.reservation-empty-row,
+        .resident-reservations-table tbody tr.reservation-empty-row > td { display: block; }
+    }
 </style>
 
 <div class="app-wrapper">
@@ -461,14 +592,14 @@ require_once '../includes/header.php';
             </div>
 
             <!-- ============ AVAILABILITY CALENDAR ============ -->
-            <div class="card mb-4">
+            <div class="card mb-4 availability-card">
                 <div class="card-body p-4">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-calendar3 me-2"></i>Check Availability</h5>
-                        <select id="availFacility" class="form-select form-select-sm" style="max-width: 220px;" aria-label="Facility"></select>
+                        <h5 class="fw-bold mb-0 availability-heading"><i class="bi bi-calendar3 me-2"></i>Check Availability</h5>
+                        <select id="availFacility" class="form-select form-select-sm availability-facility" style="max-width: 220px;" aria-label="Facility"></select>
                     </div>
 
-                    <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="availability-controls">
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="availPrev" aria-label="Previous month">
                             <i class="bi bi-chevron-left"></i>
                         </button>
@@ -490,7 +621,7 @@ require_once '../includes/header.php';
                         <span><i style="background:#fbd9d9"></i> Fully booked</span>
                         <span><i style="background:#f1f1f1"></i> Past</span>
                     </div>
-                    <div class="small text-muted mt-1">Open <?= date('g:i A', strtotime($fac_cfg['open'])) ?> to <?= date('g:i A', strtotime($fac_cfg['close'])) ?>. Court and Tennis Court bookings share availability; Clubhouse bookings are scheduled separately.</div>
+                    <div class="small text-muted mt-2 availability-hours">Open <?= date('g:i A', strtotime($fac_cfg['open'])) ?> to <?= date('g:i A', strtotime($fac_cfg['close'])) ?>. Court and Tennis Court bookings share availability; Clubhouse bookings are scheduled separately.</div>
 
                     <div id="availDetail" class="mt-3"></div>
                 </div>
@@ -499,7 +630,7 @@ require_once '../includes/header.php';
             <!-- ============ RESERVATION TABLE ============ -->
             <div class="card">
                 <div class="card-body p-4">
-                    <div class="table-responsive border-0 shadow-none p-0">
+                    <div class="table-responsive resident-reservations-table-wrap border-0 shadow-none p-0">
                         <table class="table table-hover align-middle mb-0 resident-reservations-table">
                             <thead>
                                 <tr>
@@ -522,7 +653,7 @@ require_once '../includes/header.php';
                                     $pay_amount     = (float) ($row['payment_amount'] ?? 0);
                                     $is_down        = ($row['payment_option'] ?? '') === 'downpayment';
                                 ?>
-                                    <tr>
+                                    <tr class="reservation-row">
                                         <!-- FACILITY -->
                                         <td class="fw-semibold"><?= htmlspecialchars($row['facility'] ?? '') ?></td>
 
@@ -608,7 +739,7 @@ require_once '../includes/header.php';
                                 <?php endforeach; ?>
 
                                 <?php if (empty($reservations)): ?>
-                                    <tr>
+                                    <tr class="reservation-empty-row">
                                         <td colspan="7" class="table-empty-state">
                                             <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
                                             No bookings yet.

@@ -8,30 +8,38 @@ $expected = $_SESSION['oauth_state'] ?? '';
 $verifier = $_SESSION['oauth_verifier'] ?? '';
 $name     = $_SESSION['oauth_provider'] ?? '';
 $mode     = $_SESSION['oauth_mode'] ?? 'login';
-unset($_SESSION['oauth_state'], $_SESSION['oauth_verifier'], $_SESSION['oauth_provider'], $_SESSION['oauth_mode']);
+$loginRole = $_SESSION['oauth_login_role'] ?? '';
+unset($_SESSION['oauth_state'], $_SESSION['oauth_verifier'], $_SESSION['oauth_provider'], $_SESSION['oauth_mode'], $_SESSION['oauth_login_role']);
 
-function oauth_fail($mode, $msg) {
+// The connect result is shown in the Connected Accounts card on the resident profile.
+function oauth_connect_return() {
+    return ($_SESSION['role'] ?? '') === 'admin'
+        ? role_home('admin')
+        : BASE_PATH . '/resident/profile.php#connectedAccounts';
+}
+
+function oauth_fail($mode, $msg, $loginRole = '') {
     if ($mode === 'connect' && !empty($_SESSION['user_id'])) {
         $_SESSION['oauth_flash'] = ['type' => 'danger', 'msg' => $msg];
-        header("Location: " . role_home($_SESSION['role'] ?? 'homeowner'));
+        header("Location: " . oauth_connect_return());
     } else {
         $_SESSION['login_error'] = $msg;
-        header("Location: " . BASE_PATH . "/login.php");
+        header("Location: " . BASE_PATH . ($loginRole === 'admin' ? '/admin/login.php' : '/login.php'));
     }
     exit;
 }
 
 // 1. CSRF (state) check
 if ($expected === '' || $verifier === '' || !hash_equals($expected, (string) ($_GET['state'] ?? ''))) {
-    oauth_fail($mode, "Login session expired. Please try again.");
+    oauth_fail($mode, "Login session expired. Please try again.", $loginRole);
 }
 
 $p = oauth_provider($name);
-if (!$p) oauth_fail($mode, "That login method is not available.");
+if (!$p) oauth_fail($mode, "That login method is not available.", $loginRole);
 
 // 2. User pressed Cancel / Google returned an error
 if (isset($_GET['error']) || empty($_GET['code'])) {
-    oauth_fail($mode, "{$p['label']} sign-in was cancelled.");
+    oauth_fail($mode, "{$p['label']} sign-in was cancelled.", $loginRole);
 }
 
 // 3. Get the verified profile from Google
@@ -39,7 +47,7 @@ try {
     $profile = oauth_fetch_profile($p, $_GET['code'], $verifier);
 } catch (Exception $e) {
     error_log('OAuth error: ' . $e->getMessage());
-    oauth_fail($mode, "Could not verify with {$p['label']}. Please try again.");
+    oauth_fail($mode, "Could not verify with {$p['label']}. Please try again.", $loginRole);
 }
 
 /* ------------------------------------------------------------
@@ -60,6 +68,13 @@ if ($mode === 'connect') {
     }
 
     if (!$existing) {
+        if ($profile['email'] === '') {
+            oauth_fail('connect', "Please use a {$p['label']} account with a verified email address.");
+        }
+        if (email_in_use($conn, $profile['email'], $uid)) {
+            oauth_fail('connect', "That {$p['label']} email is already used by another account. Please use a different one.");
+        }
+
         // One Google account per user: replace the old one, if any
         $stmt = $conn->prepare("DELETE FROM user_identities WHERE user_id = ? AND provider = ?");
         $stmt->bind_param("is", $uid, $name);
@@ -73,7 +88,7 @@ if ($mode === 'connect') {
     }
 
     $_SESSION['oauth_flash'] = ['type' => 'success', 'msg' => "{$p['label']} connected. You can now log in with it."];
-    header("Location: " . role_home($_SESSION['role'] ?? 'homeowner'));
+    header("Location: " . oauth_connect_return());
     exit;
 }
 
@@ -89,7 +104,14 @@ $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$user) {
-    oauth_fail('login', "No account is linked to this {$p['label']} yet. Log in with your username first, then connect it from your profile.");
+    $message = $loginRole === 'admin'
+        ? 'No administrator account is linked to this Google account. Use the Google account linked to your admin profile.'
+        : "No account is linked to this {$p['label']} yet. Log in with your username first, then connect it from your profile.";
+    oauth_fail('login', $message, $loginRole);
+}
+
+if ($loginRole !== '' && ($user['role'] ?? '') !== $loginRole) {
+    oauth_fail('login', 'This Google account is not linked to an administrator account.', $loginRole);
 }
 
 complete_login($conn, $user);

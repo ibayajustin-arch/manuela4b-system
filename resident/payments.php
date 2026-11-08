@@ -88,6 +88,131 @@ $last_payment_label = ($last_payment && !empty($last_payment['payment_date']) &&
     : '—';
 ?>
 
+<style>
+    /* Payment history: full table on desktop, one compact card per payment on phones.
+       Details (receipt no., date, status) are on the receipt itself. */
+    .resident-payments-page .rp-paid-on { display: none; }
+    .resident-payments-page .rp-action-label { display: none; }
+
+    @media (max-width: 767.98px) {
+        html body .resident-payments-page .table-responsive:has(.resident-payments-table) {
+            overflow: visible !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        html body .resident-payments-page .card:has(.resident-payments-table) {
+            border: 0 !important;
+            background: transparent !important;
+        }
+        html body .resident-payments-page .resident-payments-table {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        html body .resident-payments-page .resident-payments-table thead { display: none !important; }
+        html body .resident-payments-page .resident-payments-table tbody {
+            display: grid !important;
+            gap: .6rem;
+            width: 100%;
+        }
+
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            grid-template-areas:
+                "month receipt archive"
+                "amount receipt archive";
+            align-items: center;
+            gap: .15rem .45rem;
+            width: 100%;
+            padding: .75rem .8rem;
+            border: 1px solid var(--border-color-soft, #CBE3DC);
+            border-radius: 12px;
+            background: #FFFFFF;
+        }
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row > td:not(.m-hide) {
+            display: block !important;
+            min-width: 0;
+            padding: 0 !important;
+            border: 0 !important;
+            background: transparent !important;
+            white-space: normal !important;
+            text-align: left !important;
+        }
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row > td::before {
+            content: none !important;
+            display: none !important;
+        }
+
+        html body .resident-payments-page .resident-payments-table td.rp-desc { grid-area: month; }
+        html body .resident-payments-page .resident-payments-table td.rp-amount { grid-area: amount; }
+        html body .resident-payments-page .resident-payments-table td.rp-receipt { grid-area: receipt; }
+        html body .resident-payments-page .resident-payments-table td.rp-actions { grid-area: archive; }
+
+        html body .resident-payments-page .rp-kind { display: none; }
+        html body .resident-payments-page .rp-month {
+            color: var(--text-heading, #0F1F1B);
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        html body .resident-payments-page .resident-payments-table td.rp-amount {
+            color: var(--text-muted, #4A5C57);
+            font-size: .9rem !important;
+            font-weight: 600;
+        }
+        html body .resident-payments-page .rp-paid-on { display: inline; font-weight: 500; }
+        html body .resident-payments-page .resident-payments-table td form { display: inline-flex; margin: 0; }
+
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row > td.m-hide { display: none !important; }
+
+        /* Action name above each icon button */
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row > td.rp-receipt,
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-row > td.rp-actions {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            gap: .2rem;
+            text-align: center !important;
+        }
+        html body .resident-payments-page .rp-action-label {
+            display: block;
+            color: var(--text-muted, #4A5C57);
+            font-size: .75rem;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+        html body .resident-payments-page .resident-payments-table td .btn-label { display: none !important; }
+
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-empty,
+        html body .resident-payments-page .resident-payments-table tbody tr.rp-empty > td {
+            display: block !important;
+            padding: 1.5rem 1rem !important;
+            text-align: center !important;
+        }
+
+        html body .resident-payments-page .payment-balance-card.balance-card-success {
+            justify-content: flex-start;
+            gap: .35rem;
+        }
+        html body .resident-payments-page .payment-balance-card.balance-card-success .payment-balance-value {
+            margin: .35rem 0 0;
+            line-height: 1.15;
+        }
+        html body .resident-payments-page .payment-balance-card.balance-card-success .payment-balance-note {
+            margin: 0;
+            line-height: 1.4;
+        }
+        html body .resident-payments-page .payment-balance-card.balance-card-success .payment-next-due {
+            margin-top: auto;
+        }
+    }
+</style>
+
 <div class="app-wrapper">
     <?php require_once '../includes/sidebar.php'; ?>
     <div class="main-content">
@@ -209,41 +334,60 @@ $last_payment_label = ($last_payment && !empty($last_payment['payment_date']) &&
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($payment_history as $p): ?>
-                                <tr>
-                                    <td><?= !empty($p['payment_date']) && $p['payment_date'] !== '0000-00-00' ? date('M d, Y', strtotime($p['payment_date'])) : '-' ?></td>
-                                    <td>Monthly Dues (<?= date('F Y', strtotime($p['period_covered'] . '-01')) ?>)</td>
-                                    <td class="text-muted small"><?= htmlspecialchars($p['receipt_no'] ?? '-') ?></td>
-                                    <td class="fw-semibold">₱ <?= number_format($p['amount_paid'], 2) ?></td>
-                                    <td>
+                                <?php foreach ($payment_history as $p):
+                                    $hasDate = !empty($p['payment_date']) && $p['payment_date'] !== '0000-00-00';
+                                    $periodRaw = (string) ($p['period_covered'] ?? '');
+                                    $monthLabel = preg_match('/^\d{4}-\d{2}$/', $periodRaw)
+                                        ? date('F Y', strtotime($periodRaw . '-01'))
+                                        : $periodRaw;
+                                    $paidOn = $hasDate ? date('M d, Y', strtotime($p['payment_date'])) : '';
+                                ?>
+                                <tr class="rp-row">
+                                    <td class="rp-date m-hide"><?= $hasDate ? $paidOn : '-' ?></td>
+                                    <td class="rp-desc">
+                                        <span class="rp-kind">Monthly Dues · </span><span class="rp-month"><?= htmlspecialchars($monthLabel) ?></span>
+                                    </td>
+                                    <td class="rp-ref text-muted small m-hide"><?= htmlspecialchars($p['receipt_no'] ?? '-') ?></td>
+                                    <td class="rp-amount fw-semibold">
+                                        ₱ <?= number_format((float) $p['amount_paid'], 2) ?><?php if ($paidOn): ?><span class="rp-paid-on"> · Paid <?= $paidOn ?></span><?php endif; ?>
+                                    </td>
+                                    <td class="rp-status m-hide">
                                         <span class="badge badge-success"><i class="bi bi-check-circle-fill me-1"></i>Paid</span>
                                     </td>
-                                    <td>
-                                        <?php if (!empty($p['payment_date']) && $p['payment_date'] !== '0000-00-00'): ?>
+                                    <td class="rp-receipt">
+                                        <?php if ($hasDate): ?>
+                                            <span class="rp-action-label" aria-hidden="true">Receipt</span>
                                             <button type="button"
-                                                    class="btn btn-sm btn-outline-secondary"
+                                                    class="btn btn-sm btn-outline-secondary act-icon"
+                                                    title="View receipt"
+                                                    aria-label="View receipt for <?= htmlspecialchars($monthLabel) ?>"
                                                     onclick="openReceipt('payment', <?= (int) $p['id'] ?>)">
-                                                <i class="bi bi-receipt me-1"></i> Receipt
+                                                <i class="bi bi-receipt"></i><span class="btn-label ms-1">Receipt</span>
                                             </button>
                                         <?php else: ?>
                                             <span class="text-muted small">-</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td>
+                                    <td class="rp-actions">
+                                        <span class="rp-action-label" aria-hidden="true"><?= $archiveView ? 'Restore' : 'Archive' ?></span>
                                         <form method="POST" action="payment_archive.php" class="d-inline" onsubmit="return confirm('<?= $archiveView ? 'Restore' : 'Archive' ?> this receipt?');">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                                             <input type="hidden" name="payment_id" value="<?= (int) $p['id'] ?>">
                                             <input type="hidden" name="action" value="<?= $archiveView ? 'restore' : 'archive' ?>">
                                             <input type="hidden" name="return_view" value="<?= $archiveView ? 'archive' : 'active' ?>">
-                                            <button type="submit" class="btn btn-sm <?= $archiveView ? 'btn-outline-success' : 'btn-outline-secondary' ?>" <?= !$archiveReady ? 'disabled' : '' ?>>
-                                                <i class="bi bi-<?= $archiveView ? 'arrow-counterclockwise' : 'archive' ?> me-1"></i><?= $archiveView ? 'Restore' : 'Archive' ?>
+                                            <button type="submit"
+                                                    class="btn btn-sm act-icon <?= $archiveView ? 'btn-outline-success' : 'btn-outline-secondary' ?>"
+                                                    title="<?= $archiveView ? 'Restore receipt' : 'Archive receipt' ?>"
+                                                    aria-label="<?= $archiveView ? 'Restore' : 'Archive' ?> receipt for <?= htmlspecialchars($monthLabel) ?>"
+                                                    <?= !$archiveReady ? 'disabled' : '' ?>>
+                                                <i class="bi bi-<?= $archiveView ? 'arrow-counterclockwise' : 'archive' ?>"></i><span class="btn-label ms-1"><?= $archiveView ? 'Restore' : 'Archive' ?></span>
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                                 <?php if (empty($payment_history)): ?>
-                                <tr><td colspan="7" class="table-empty-state text-muted" style="border: none;"><?= $archiveView ? 'No archived payment history.' : 'No payment history yet.' ?></td></tr>
+                                <tr class="rp-empty"><td colspan="7" class="table-empty-state text-muted" style="border: none;"><?= $archiveView ? 'No archived payment history.' : 'No payment history yet.' ?></td></tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>

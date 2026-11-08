@@ -1,5 +1,12 @@
 <?php
 
+// --- Timezone (Philippines) ---
+date_default_timezone_set('Asia/Manila');
+
+// TEMPORARY: set to true to see the real PHP error on the live site.
+// Set back to false once the page works.
+const FORCE_DEBUG = true;
+
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['SERVER_PORT'] ?? '') == 443);
 
@@ -7,7 +14,7 @@ $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $hostOnly = strtolower(explode(':', $httpHost)[0]);
 $isLocal = in_array($hostOnly, ['localhost', '127.0.0.1', '::1'], true)
         || (php_sapi_name() === 'cli' && empty($_SERVER['HTTP_HOST']));
-$debugEnabled = $isLocal || getenv('APP_DEBUG') === '1';
+$debugEnabled = FORCE_DEBUG || $isLocal || getenv('APP_DEBUG') === '1';
 
 // Never expose PHP errors to public hosting visitors. Use server logs there.
 ini_set('display_errors', $debugEnabled ? '1' : '0');

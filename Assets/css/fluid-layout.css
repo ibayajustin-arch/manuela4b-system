@@ -1,0 +1,172 @@
+:root {
+    --fluid-card-gap: clamp(0.75rem, 1.2vw, 1.25rem);
+    --fluid-card-padding: clamp(0.9rem, 0.72rem + 0.65vw, 1.35rem);
+    --fluid-grid-min: 250px;
+}
+
+html body :is(.card, .login-card, .terms-card) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+html body .card-body:not(.p-0) {
+    padding: var(--fluid-card-padding);
+}
+
+html body .card-header:not(.p-0) {
+    padding: clamp(0.75rem, 0.65rem + 0.35vw, 1rem)
+        clamp(0.9rem, 0.75rem + 0.65vw, 1.25rem);
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+}
+
+html body .main-content .page-header h1 {
+    font-size: clamp(1.3rem, 1.05rem + 0.9vw, 1.9rem);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+html body .main-content .row:has(> [class*="col"] > .card),
+html body .main-content .row:has(> [class*="col"] > a > .card) {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, var(--fluid-grid-min)), 1fr)
+    );
+    gap: var(--fluid-card-gap);
+    margin: 0 0 var(--fluid-card-gap);
+    --bs-gutter-x: 0;
+    --bs-gutter-y: 0;
+}
+
+html body .main-content .row:has(> [class*="col"] > .card) > [class*="col"],
+html body .main-content .row:has(> [class*="col"] > a > .card) > [class*="col"] {
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    padding: 0;
+}
+
+html body .main-content .dashboard-kpi-row {
+    --fluid-grid-min: 165px;
+}
+
+html body .main-content .dashboard-feature-row {
+    --fluid-grid-min: 320px;
+}
+
+html body .main-content .row:has(.homeowner-summary-card) {
+    --fluid-grid-min: 165px;
+}
+
+@media (max-width: 479.98px) {
+    :root {
+        --fluid-card-gap: 0.75rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    :root {
+        --fluid-card-gap: 1rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    html,
+    body {
+        max-width: 100%;
+        overflow-x: clip;
+    }
+
+    body {
+        min-width: 320px;
+    }
+
+    .app-wrapper {
+        min-height: 100svh;
+        height: auto;
+        overflow: visible;
+    }
+
+    .main-content {
+        width: 100%;
+        min-width: 0;
+        padding-inline: calc(0.75rem + env(safe-area-inset-left))
+            calc(0.75rem + env(safe-area-inset-right));
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+    }
+
+    .main-content > :is(.container, .container-fluid),
+    .main-content .row,
+    .main-content .row > *,
+    .main-content .card,
+    .main-content .card-body,
+    .main-content .table-responsive {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .main-content :is(img, video, canvas, svg, iframe) {
+        max-width: 100%;
+    }
+
+    html body .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+    html body .main-content .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+    html body .modal .btn:not(.btn-icon):not(.btn-close),
+    html body .offcanvas .btn:not(.btn-icon):not(.btn-close),
+    html body .main-content .btn-icon,
+    html body .main-content .homeowner-action-btn,
+    html body .main-content .btn-topbar-bell,
+    html body .modal .btn-icon,
+    html body .offcanvas .btn-icon,
+    html body .btn-topbar-bell,
+    html body .main-content .btn-close,
+    html body .modal .btn-close,
+    html body .password-visibility-toggle,
+    html body .password-visibility-toggle--icon {
+        min-height: 48px;
+    }
+
+    html body .main-content .btn-icon,
+    html body .main-content .homeowner-action-btn,
+    html body .main-content .btn-topbar-bell,
+    html body .modal .btn-icon,
+    html body .offcanvas .btn-icon,
+    html body .btn-topbar-bell,
+    html body .main-content .btn-close,
+    html body .modal .btn-close,
+    html body .password-visibility-toggle,
+    html body .password-visibility-toggle--icon {
+        min-width: 48px;
+    }
+
+    html body .homeowners-page .homeowner-actions .homeowner-action-btn {
+        width: 48px;
+        height: 48px;
+    }
+
+    html body .main-content :is(.form-control, .form-select, textarea),
+    html body .modal :is(.form-control, .form-select, textarea),
+    html body .offcanvas :is(.form-control, .form-select, textarea) {
+        min-width: 0;
+        min-height: 48px;
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    .main-content .table-responsive {
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .main-content .btn-group,
+    .main-content .page-header > .d-flex,
+    .main-content .page-header > div.d-flex {
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .modal-dialog {
+        max-width: calc(100vw - 1rem);
+    }
+}

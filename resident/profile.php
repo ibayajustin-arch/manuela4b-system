@@ -12,6 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] === 'admin') {
 $csrf_token = generateCsrfToken();
 $user_id = (int) $_SESSION['user_id'];
 $profile_error = null;
+$announcement_error = false;
+$active_modal = null;
+$details_values = [];
 
 $profile_photo = null;
 try {
@@ -52,7 +55,10 @@ $profile_values = [
     'address' => $homeowner['address'] ?? '',
 ];
 
+require_once '../includes/auth_helpers.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_profile') {
+    $active_modal = 'residentProfileModal';
     foreach ($profile_values as $field => $_value) {
         $profile_values[$field] = trim((string) ($_POST[$field] ?? ''));
     }
@@ -66,6 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
         $profile_error = 'Please enter a name up to 100 characters.';
     } elseif (!filter_var($profile_values['email'], FILTER_VALIDATE_EMAIL) || $textLength($profile_values['email']) > 100) {
         $profile_error = 'Please enter a valid email address up to 100 characters.';
+    } elseif (normalize_email($profile_values['email']) !== normalize_email($homeowner['email'] ?? '')
+        && email_in_use($conn, $profile_values['email'], $user_id, (int) $homeowner['id'])) {
+        $profile_error = 'This email is already used by another account. Please use a different email.';
     } elseif ($profile_values['contact'] === '' || $textLength($profile_values['contact']) > 20
         || !preg_match('/^[0-9+().\s-]{7,20}$/', $profile_values['contact'])) {
         $profile_error = 'Please enter a valid contact number (7–20 characters).';
@@ -111,14 +120,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_resident_details') {
+    $active_modal = 'residentDetailsModal';
+    $details_values = [
+        'emergency_contact_name' => trim((string) ($_POST['emergency_contact_name'] ?? '')),
+        'emergency_contact_number' => trim((string) ($_POST['emergency_contact_number'] ?? '')),
+        'household_members' => trim((string) ($_POST['household_members'] ?? '')),
+    ];
     if (!validateCsrfToken($_POST['csrf_token'] ?? '')) {
         $profile_error = 'Your session expired. Please refresh and try again.';
     } elseif (!$can_edit_details) {
         $profile_error = 'These details can be updated after your resident application is approved.';
     } else {
-        $emergency_name = trim($_POST['emergency_contact_name'] ?? '');
-        $emergency_number = trim($_POST['emergency_contact_number'] ?? '');
-        $household_members = trim($_POST['household_members'] ?? '');
+        $emergency_name = $details_values['emergency_contact_name'];
+        $emergency_number = $details_values['emergency_contact_number'];
+        $household_members = $details_values['household_members'];
         $textLength = static fn($value) => function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') : strlen($value);
 
         if ($textLength($emergency_name) > 100 || $textLength($emergency_number) > 30 || $textLength($household_members) > 5000) {
@@ -168,6 +183,7 @@ try {
 } catch (Throwable $e) {
     error_log('Resident announcements could not be loaded: ' . $e->getMessage());
     $profile_error = 'Community announcements are temporarily unavailable.';
+    $announcement_error = true;
     $announcements = [];
 }
 
@@ -176,12 +192,85 @@ $flash_error = $profile_error ?? ($_SESSION['flash_error'] ?? null);
 unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 require_once '../includes/header.php';
 ?>
+<style>
+    .resident-profile-page,
+    .resident-profile-page .card,
+    .resident-profile-page .card-body {
+        min-width: 0;
+    }
+
+    html body .main-content .resident-profile-page .profile-dashboard-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: auto;
+        min-height: 48px !important;
+        padding: 0.5rem 1.25rem;
+        font-size: 1rem !important;
+    }
+
+    .resident-profile-page .info-row {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        align-items: start;
+        gap: 0.75rem;
+    }
+
+    .resident-profile-page .info-label,
+    .resident-profile-page .info-value {
+        min-width: 0;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .resident-profile-page .info-value {
+        text-align: right;
+        word-break: normal;
+        letter-spacing: normal;
+    }
+
+    .resident-profile-page .fw-semibold,
+    .resident-profile-page .info-value,
+    .resident-profile-page h4,
+    .resident-profile-page .announcement-item h6,
+    .resident-profile-page .announcement-item p {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .resident-profile-page .announcement-item > .d-flex > h6 {
+        flex: 1 1 auto;
+    }
+
+    @media (max-width: 575.98px) {
+        .resident-profile-page .info-row {
+            grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+            gap: 0.5rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        body:has(.resident-profile-page) .mobile-topbar-title {
+            position: absolute;
+            left: 50%;
+            width: max-content;
+            max-width: calc(100% - 112px);
+            transform: translateX(-50%);
+        }
+    }
+</style>
 <div class="app-wrapper">
     <?php require_once '../includes/sidebar.php'; ?>
     <div class="main-content">
-        <div class="container-fluid p-0">
+        <div class="container-fluid p-0 resident-profile-page">
 
-            <h2 class="fw-bold mb-4">Profile</h2>
+            <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                <h2 class="fw-bold mb-0">Profile</h2>
+                <a href="dashboard.php" class="btn btn-primary profile-dashboard-btn d-md-none">
+                    <i class="bi bi-speedometer2" aria-hidden="true"></i>Dashboard
+                </a>
+            </div>
 
             <?php if ($flash_success): ?>
                 <div class="alert alert-success border-0 rounded-3 d-flex align-items-center mb-4 shadow-sm">
@@ -195,7 +284,7 @@ require_once '../includes/header.php';
             <?php endif; ?>
 
             <div class="row">
-                <div class="col-md-6 col-lg-5">
+                <div class="col-lg-5">
                     <div class="card h-100">
                         <div class="card-body text-center">
 
@@ -204,7 +293,7 @@ require_once '../includes/header.php';
                                 <div class="avatar-upload-wrapper">
                                     <?php if ($has_photo): ?>
                                         <div class="avatar-circle avatar-circle-photo border shadow-sm">
-                                            <img src="../<?= htmlspecialchars($profile_photo) ?>" alt="Profile photo">
+                                            <img src="../<?= htmlspecialchars($profile_photo) ?>?v=<?= (int) filemtime('../' . $profile_photo) ?>" alt="Profile photo">
                                         </div>
                                     <?php else: ?>
                                         <div class="avatar-circle border shadow-sm text-primary bg-primary-subtle">
@@ -212,10 +301,10 @@ require_once '../includes/header.php';
                                         </div>
                                     <?php endif; ?>
 
-                                    <label for="photoInput" class="avatar-edit-btn" title="Change photo">
-                                        <i class="bi bi-camera-fill"></i>
+                                    <label for="photoInput" class="avatar-edit-btn" title="Change photo" aria-label="Change profile photo" tabindex="0">
+                                        <i class="bi bi-camera-fill" aria-hidden="true"></i>
                                     </label>
-                                    <input type="file" name="profile_photo" id="photoInput" accept="image/png, image/jpeg, image/webp" hidden>
+                                    <input type="file" name="profile_photo" id="photoInput" accept="image/png, image/jpeg, image/webp" class="visually-hidden">
                                 </div>
                             </form>
 
@@ -238,7 +327,7 @@ require_once '../includes/header.php';
                                     <span class="info-value text-dark text-capitalize"><?= htmlspecialchars($role_label) ?></span>
                                 </div>
                                 <div class="info-row border-bottom-0 pb-2 pt-2">
-                                    <span class="info-label text-muted"><i class="bi bi-house"></i> Property</span>
+                                    <span class="info-label text-muted"><i class="bi bi-house"></i> Block / Lot</span>
                                     <span class="info-value text-dark"><?= $property_label ?></span>
                                 </div>
                                 <div class="info-row border-bottom-0 pb-2 pt-2">
@@ -267,10 +356,16 @@ require_once '../includes/header.php';
                     </div>
                 </div>
 
-                <div class="col-md-6 col-lg-7 mt-4 mt-md-0">
+                <div class="col-lg-7 mt-4 mt-lg-0">
                     <div class="card h-100">
                         <div class="card-body">
-                            <?php if (empty($announcements)): ?>
+                            <?php if ($announcement_error): ?>
+                                <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 h-100" role="status">
+                                    <i class="bi bi-cloud-slash text-muted mb-3 fs-1 opacity-50" aria-hidden="true"></i>
+                                    <h5 class="fw-bold text-dark">Announcements unavailable</h5>
+                                    <p class="text-muted mb-0">Please try again later.</p>
+                                </div>
+                            <?php elseif (empty($announcements)): ?>
                                 <div class="d-flex flex-column justify-content-center align-items-center text-center py-5 h-100">
                                     <i class="bi bi-megaphone text-muted mb-3 fs-1 opacity-50"></i>
                                     <h5 class="fw-bold text-dark">Community Announcements</h5>
@@ -279,13 +374,12 @@ require_once '../includes/header.php';
                             <?php else: ?>
                                 <div class="d-flex align-items-center justify-content-between mb-3">
                                     <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-megaphone-fill text-primary me-2"></i>Community Announcements</h5>
-                                    <span class="badge badge-info"><?= count($announcements) ?> new</span>
+                                    <span class="badge badge-info"><?= count($announcements) ?> latest</span>
                                 </div>
                                 <div class="announcements-list pe-1" style="max-height: 500px; overflow-y: auto;">
                                     <?php foreach ($announcements as $index => $a): ?>
-                                        <div class="announcement-item mb-2 p-3 rounded-3 border bg-white"
-                                             data-bs-toggle="modal"
-                                             data-bs-target="#viewAnnouncementModal"
+                                        <button type="button" class="announcement-item w-100 text-start mb-2 p-3 rounded-3 border bg-white"
+                                             data-bs-toggle="modal" data-bs-target="#viewAnnouncementModal"
                                              data-title="<?= htmlspecialchars($a['title']) ?>"
                                              data-date="<?= date('M d, Y h:i A', strtotime($a['created_at'])) ?>"
                                              data-message="<?= htmlspecialchars($a['message']) ?>">
@@ -296,8 +390,9 @@ require_once '../includes/header.php';
                                                     <i class="bi bi-calendar-event me-1"></i><?= date('M d, Y', strtotime($a['created_at'])) ?>
                                                 </span>
                                             </div>
-                                            <p class="text-muted mb-0 small">Click to read full details...</p>
-                                        </div>
+                                            <p class="text-muted mb-0 small"><?= htmlspecialchars(mb_strimwidth(strip_tags($a['message']), 0, 140, '…', 'UTF-8')) ?></p>
+                                            <span class="visually-hidden">Open announcement details</span>
+                                        </button>
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
@@ -307,8 +402,8 @@ require_once '../includes/header.php';
             </div>
 
             <!-- Connected accounts (Google / phone login) -->
-            <div class="row mt-4">
-                <div class="col-lg-8 col-xl-6">
+            <div class="row mt-4" id="connectedAccounts">
+                <div class="col-12">
                     <?php require_once '../includes/connected_accounts.php'; ?>
                 </div>
             </div>
@@ -327,7 +422,7 @@ require_once '../includes/header.php';
                         <?php if ($can_edit_details): ?>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div class="small text-muted">Emergency contact</div>
+                                    <div class="small text-muted">Emergency Person</div>
                                     <div class="fw-semibold"><?= htmlspecialchars($homeowner['emergency_contact_name'] ?: '—') ?></div>
                                 </div>
                                 <div class="col-md-6">
@@ -363,16 +458,16 @@ require_once '../includes/header.php';
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="emergencyContactName" class="form-label">Emergency contact name</label>
-                        <input type="text" id="emergencyContactName" name="emergency_contact_name" class="form-control" maxlength="100" value="<?= htmlspecialchars($homeowner['emergency_contact_name'] ?? '') ?>">
+                        <label for="emergencyContactName" class="form-label">Emergency Person</label>
+                        <input type="text" id="emergencyContactName" name="emergency_contact_name" class="form-control" maxlength="100" value="<?= htmlspecialchars($details_values['emergency_contact_name'] ?? ($homeowner['emergency_contact_name'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="mb-3">
                         <label for="emergencyContactNumber" class="form-label">Emergency contact number</label>
-                        <input type="tel" id="emergencyContactNumber" name="emergency_contact_number" class="form-control" maxlength="30" value="<?= htmlspecialchars($homeowner['emergency_contact_number'] ?? '') ?>">
+                        <input type="tel" id="emergencyContactNumber" name="emergency_contact_number" class="form-control" maxlength="30" value="<?= htmlspecialchars($details_values['emergency_contact_number'] ?? ($homeowner['emergency_contact_number'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div>
                         <label for="householdMembers" class="form-label">Household members</label>
-                        <textarea id="householdMembers" name="household_members" class="form-control" rows="5" maxlength="5000"><?= htmlspecialchars($homeowner['household_members'] ?? '') ?></textarea>
+                        <textarea id="householdMembers" name="household_members" class="form-control" rows="5" maxlength="5000"><?= htmlspecialchars($details_values['household_members'] ?? ($homeowner['household_members'] ?? ''), ENT_QUOTES, 'UTF-8') ?></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -450,15 +545,15 @@ require_once '../includes/header.php';
 </div>
 
 <script>
-    <?php if ($profile_error && ($_POST['action'] ?? '') === 'update_profile'): ?>
+    <?php if ($profile_error && $active_modal): ?>
     document.addEventListener('DOMContentLoaded', function () {
-        var profileModal = document.getElementById('residentProfileModal');
-        if (profileModal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(profileModal).show();
+        var editModal = document.getElementById(<?= json_encode($active_modal) ?>);
+        if (editModal && window.bootstrap) bootstrap.Modal.getOrCreateInstance(editModal).show();
     });
     <?php endif; ?>
 
     // Auto-submit the upload form as soon as a photo is chosen
-    document.getElementById('photoInput').addEventListener('change', function () {
+    document.getElementById('photoInput')?.addEventListener('change', function () {
         if (this.files && this.files.length > 0) {
             window.showPageLoading('Uploading profile photo...');
             document.getElementById('photoUploadForm').submit();

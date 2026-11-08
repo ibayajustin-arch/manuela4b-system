@@ -1,81 +1,54 @@
-\# Agent Instructions
+# AGENTS.md
 
-\> This file is mirrored across CLAUDE.md, AGENTS.md, and GEMINI.md so the same instructions load in any AI environment.
+## Project
+Manuela 4B MIS: a PHP + MySQL web app (admin dashboard, analytics, residents, payments, facility reservations).
+Runs locally on XAMPP (C:\xampp\htdocs\Manuela). Deployed on InfinityFree free hosting (shared PHP hosting, no Node.js on the server).
 
-You operate within a 3-layer architecture that separates concerns to maximize reliability. LLMs are probabilistic, whereas most business logic is deterministic and requires consistency. This system fixes that mismatch.
+## Stack
+- PHP (plain, no framework), MySQL, vanilla JavaScript
+- Hosting limits: shared hosting only. Do not add Node.js, Composer-heavy, or server-side build steps.
 
-\#\# The 3-Layer Architecture
+## Folder map
+- Admin/Dashboard.php, Admin/analytics.php: admin pages
+- Admin/api/analytics*.php: JSON endpoints (must output valid JSON only, no JS or HTML)
+- includes/: shared PHP helpers (analytics_data.php, analytics_overview.php)
+- js/: admin-analytics.js, admin-dashboard-analytics.js
 
-\*\*Layer 1: Directive (What to do)\*\*  
-\- Basically just SOPs written in Markdown, live in \`directives/\`  
-\- Define the goals, inputs, tools/scripts to use, outputs, and edge cases  
-\- Natural language instructions, like you'd give a mid-level employee
+## Do not touch (ask first)
+- The database connection/config file (credentials). Never print or commit passwords or API keys.
+- Any .sql file with real data. Sample data files are fine to edit.
+- Do not delete files. Do not rename folders.
 
-\*\*Layer 2: Orchestration (Decision making)\*\*  
-\- This is you. Your job: intelligent routing.  
-\- Read directives, call execution tools in the right order, handle errors, ask for clarification, update directives with learnings  
-\- You're the glue between intent and execution. E.g you don't try scraping websites yourself—you read \`directives/scrape\_website.md\` and come up with inputs/outputs and then run \`execution/scrape\_single\_site.py\`
+## Rules for changes
+- Make the smallest change that fixes the problem. Edit only the files I name.
+- Use prepared statements for all SQL. Escape all output (htmlspecialchars).
+- Keep API endpoints returning valid JSON only.
+- Do not rewrite a whole file to change a few lines.
 
-\*\*Layer 3: Execution (Doing the work)\*\*  
-\- Deterministic Python scripts in \`execution/\`  
-\- Environment variables, api tokens, etc are stored in \`.env\`  
-\- Handle API calls, data processing, file operations, database interactions  
-\- Reliable, testable, fast. Use scripts instead of manual work. Commented well.
+## Domain rules
+- Streets (block values): Duhat, Santol, Mansanas, Granada, Guyabano, Atis, Ubas
+- Payment methods: GCash and Maya only
+- Facility reservations: Court and Clubhouse only, auto-approved by the system
+- Monthly dues: 250 pesos per homeowner
 
-\*\*Why this works:\*\* if you do everything yourself, errors compound. 90% accuracy per step \= 59% success over 5 steps. The solution is push complexity into deterministic code. That way you just focus on decision-making.
+## Workflow
+- Before editing, tell me which files you will change in one line.
+- After editing, summarize what changed in 3 lines or fewer.
+- Reply in simple Taglish. Keep answers short.
 
-\#\# Operating Principles
+## UI rules
+- Frontend: Bootstrap 5.3 + Bootstrap Icons + vanilla JS. No React, Tailwind, or build step.
+- Brand: green #0F6B5A, font Inter. Keep the existing look; do not redesign unless I ask.
+- Mobile-first. Inputs and buttons 48px tall, font-size 16px on inputs, safe-area padding.
+- UI work: edit CSS/HTML only. Do not change PHP logic, SQL, or CSRF code.
+- Visible text: real info only, no filler or demo data. Taglish is OK for resident-facing labels.
 
-\*\*1. Check for tools first\*\*  
-Before writing a script, check \`execution/\` per your directive. Only create new scripts if none exist.
+## Deploy
+- Do not upload .claude/, .codex/, .agents/, .github/, .shared/, AGENTS.md, or *.md files to InfinityFree.
+- File and folder names are case-sensitive on the server. Match the exact case in every path.
 
-\*\*2. Self-anneal when things break\*\*  
-\- Read error message and stack trace  
-\- Fix the script and test it again (unless it uses paid tokens/credits/etc—in which case you check w user first)  
-\- Update the directive with what you learned (API limits, timing, edge cases)  
-\- Example: you hit an API rate limit → you then look into API → find a batch endpoint that would fix → rewrite script to accommodate → test → update directive.
-
-\*\*3. Update directives as you learn\*\*  
-Directives are living documents. When you discover API constraints, better approaches, common errors, or timing expectations—update the directive. But don't create or overwrite directives without asking unless explicitly told to. Directives are your instruction set and must be preserved (and improved upon over time, not extemporaneously used and then discarded).
-
-\*\*4. User Account Invariant (CRITICAL)\*\*  
-NEVER delete real user-created accounts (including \`carrotmanfallorina\`, \`sydrickfallorina187\`, \`snoresnacks.gg\`, or any student/admin/principal accounts created by the user). Automated test suites, database seeders, and purge scripts must ONLY target temporary synthetic test fixtures (\`eng_%\`, \`entrep_%\`, \`tech_%\`, \`test_%\`, \`audit_%\`, \`mock_%\`) and strictly exclude all user accounts.
-
-\*\*5. Global UI Rule — Simplify Content, Not Functionality\*\*  
-Apply this rule to every UI page you modify in Career Compass:  
-\- Remove unnecessary subtitles, lengthy explanations, redundant labels, repetitive notices, and decorative clutter. Show only the information users need to understand the page and complete their tasks.  
-\- Keep essential titles, readable labels, dynamic data, scores, statuses, and important actions. Use concise wording, clear visual hierarchy, consistent spacing, and a unified design system.  
-\- Do not make the interface cramped by shrinking text or removing necessary spacing. Avoid excessive borders, shadows, and decorative elements.  
-\- Preserve all existing functionality, data, calculations, and permissions. Before adding new text or UI elements, check whether the information is already communicated elsewhere.  
-\- \*\*Goal:\*\* simpler content, clearer layout, less clutter, and no loss of important information or functionality.
-
-\#\# Self-annealing loop
-
-Errors are learning opportunities. When something breaks:  
-1\. Fix it  
-2\. Update the tool  
-3\. Test tool, make sure it works  
-4\. Update directive to include new flow  
-5\. System is now stronger
-
-\#\# File Organization
-
-\*\*Deliverables vs Intermediates:\*\*  
-\- \*\*Deliverables\*\*: Google Sheets, Google Slides, or other cloud-based outputs that the user can access  
-\- \*\*Intermediates\*\*: Temporary files needed during processing
-
-\*\*Directory structure:\*\*  
-\- \`.tmp/\` \- All intermediate files (dossiers, scraped data, temp exports). Never commit, always regenerated.  
-\- \`execution/\` \- Python scripts (the deterministic tools)  
-\- \`directives/\` \- SOPs in Markdown (the instruction set)  
-\- \`.env\` \- Environment variables and API keys  
-\- \`credentials.json\`, \`token.json\` \- Google OAuth credentials (required files, in \`.gitignore\`)
-
-\*\*Key principle:\*\* Local files are only for processing. Deliverables live in cloud services (Google Sheets, Slides, etc.) where the user can access them. Everything in \`.tmp/\` can be deleted and regenerated.
-
-\#\# Summary
-
-You sit between human intent (directives) and deterministic execution (Python scripts). Read instructions, make decisions, call tools, handle errors, continuously improve the system.
-
-Be pragmatic. Be reliable. Self-anneal.
-
+## Using the frontend-design skill
+- Treat this project as an EXISTING design system (Bootstrap 5.3, brand green #0F6B5A, Inter). Match it. Do not redesign.
+- Ignore Next.js, React, Tailwind, and package.json guidance. This is PHP + vanilla JS.
+- Do not add libraries or build steps. Skip the 3-sentence design philosophy for fixes and small changes.
+- Verify at 360px and a wide desktop width. Do not claim visual checks you could not run.

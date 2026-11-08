@@ -204,6 +204,17 @@ $roleInvalid = strpos((string) $error, 'select the correct tab') !== false;
     <link href="Assets/css/resident.css?v=20" rel="stylesheet">
     <link href="Assets/css/admin.css?v=25" rel="stylesheet">
     <link href="Assets/css/reference-theme.css?v=21" rel="stylesheet">
+    <style>
+        .login-left-inner form .btn-primary {
+            background: #0F6B5A !important;
+            border-color: #0F6B5A !important;
+        }
+        .login-left-inner form .btn-primary:hover,
+        .login-left-inner form .btn-primary:focus-visible {
+            background: #0B4F42 !important;
+            border-color: #0B4F42 !important;
+        }
+    </style>
 </head>
 <body class="login-page">
     <div class="login-shell">

@@ -3,6 +3,7 @@
     if (typeof Chart === 'undefined') return;
     var money = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 2 });
     var count = new Intl.NumberFormat('en-PH');
+    Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
 
     var revenueChart = null;
 
@@ -35,8 +36,8 @@
             state.hidden = true;
             var ctx = canvas.getContext('2d');
             var grad = ctx.createLinearGradient(0, 0, 0, 300);
-            grad.addColorStop(0, 'rgba(165, 180, 252, 0.28)');
-            grad.addColorStop(1, 'rgba(165, 180, 252, 0.0)');
+            grad.addColorStop(0, 'rgba(15, 107, 90, 0.22)');
+            grad.addColorStop(1, 'rgba(15, 107, 90, 0.0)');
 
             if (revenueChart) revenueChart.destroy();
             revenueChart = new Chart(ctx, {
@@ -46,16 +47,17 @@
                     datasets: [{
                         label: 'Money collected',
                         data: series.values,
-                        borderColor: '#A5B4FC',
+                        borderColor: '#0F6B5A',
                         backgroundColor: grad,
-                        borderWidth: 3,
+                        borderWidth: 2,
                         pointRadius: 4,
                         pointHoverRadius: 6,
-                        pointBackgroundColor: '#A5B4FC',
-                        pointBorderColor: '#0B1220',
+                        pointBackgroundColor: '#0F6B5A',
+                        pointBorderColor: '#FFFFFF',
                         pointBorderWidth: 2,
                         fill: true,
-                        tension: .25
+                        // Straight segments: a curve would draw values that were never collected.
+                        tension: 0
                     }]
                 },
                 options: {
@@ -65,7 +67,7 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#070C18',
+                            backgroundColor: '#0F4C3F',
                             titleColor: '#FFFFFF',
                             bodyColor: '#E2E8F0',
                             borderColor: 'rgba(255, 255, 255, 0.12)',
@@ -76,8 +78,8 @@
                         }
                     },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#94A3B8', maxRotation: 0 } },
-                        y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.06)' }, ticks: { color: '#94A3B8', callback: function (v) { return '₱' + count.format(v); } } }
+                        x: { border: { display: false }, grid: { display: false }, ticks: { color: '#4A5C57', maxRotation: 0, minRotation: 0, autoSkipPadding: 14, callback: function (v) { return String(this.getLabelForValue(v)).replace(/ \d{4}$/, ''); } } },
+                        y: { beginAtZero: true, border: { display: false }, grid: { color: 'rgba(213, 224, 221, 0.7)', drawTicks: false }, ticks: { color: '#4A5C57', padding: 6, precision: 0, maxTicksLimit: 6, callback: function (v) { return this.max >= 10000 ? '₱' + (+(v / 1000).toFixed(1)) + 'K' : '₱' + count.format(v); } } }
                     }
                 }
             });

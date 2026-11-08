@@ -1,0 +1,206 @@
+%%{init: {"theme":"neutral","flowchart":{"curve":"linear","nodeSpacing":30,"rankSpacing":40}}}%%
+%% Manuela 4B MIS - Admin Flowchart
+%% Connector A = return to Admin Dashboard. Connector B = return to Admin Login.
+flowchart TD
+    START([Start]) --> OPEN["Open Admin Login page"]
+    OPEN --> CHOOSE
+
+    subgraph LOGIN["Admin Authentication"]
+        LB(("B")) --> CHOOSE
+        CHOOSE{"Select login method"}
+        L1[/"Enter identifier and password"/]
+        L2{"Request valid and<br/>not locked out?"}
+        L3{"Credentials valid?"}
+        L4{"Admin account?"}
+        LE1["Show error or wait message"]
+        LE2["Show: Use the Resident login"]
+        LX1(("B"))
+        G1["Sign in with Google"]
+        G2{"Sign-in completed and linked<br/>to an admin account?"}
+        G3["Show Google sign-in error"]
+        CHOOSE -->|Password| L1
+        L1 --> L2
+        L2 -->|No| LE1 --> LX1
+        L2 -->|Yes| L3
+        L3 -->|No| LE1
+        L3 -->|Yes| L4
+        L4 -->|No| LE2 --> LX1
+        CHOOSE -->|Google| G1 --> G2
+        G2 -->|No| G3 --> LX1
+    end
+
+    L4 -->|Yes| SESS["Start admin session"]
+    G2 -->|Yes| SESS
+    SESS --> DASH
+
+        CA(("A")) --> DASH
+        DASH["<b>Admin Dashboard</b><br/>KPIs: Total Homeowners, Revenue This Month, Pending Dues<br/>Revenue Overview chart, Collection Progress<br/>Needs Follow-up, Upcoming Reservations, Recent Transactions<br/>Quick Actions, notification bell"]
+        DASH --> MENU{"Select module or action"}
+
+    MENU -->|Notifications| N1["View notifications and open linked record"]
+    N1 --> A0(("A"))
+    MENU -->|"Needs Follow-up"| N2["View overdue homeowner details"]
+    N2 --> H4
+
+    MENU -->|"Visual Data Analytics"| AN1
+    subgraph AN["Visual Data Analytics"]
+        AN1["Select view: Overview, Collections, Who Pays Late,<br/>Reservations, Resident Feedback, or Forecast"]
+        AN2[/"Set date range and street filters"/]
+        AN3["Load charts and tables"]
+        AN4{"Export CSV?"}
+        AN5["Download CSV file"]
+        AN1 --> AN2 --> AN3 --> AN4
+        AN4 -->|Yes| AN5
+    end
+    AN4 -->|No| A1(("A"))
+    AN5 --> A1
+
+    MENU -->|Homeowners| H1
+    MENU -->|"Add Homeowner"| H2
+    subgraph HOME["Resident Verification and Homeowner Management"]
+        H1{"Select homeowner action"}
+        H2[/"Enter homeowner details"/]
+        H3{"Details valid?"}
+        H3E["Show error"]
+        H3S["Save homeowner record"]
+        H4["View profile, account summary,<br/>ID images, and activity"]
+        H5{"Select account action"}
+        H6[/"Edit homeowner details"/]
+        H7["Generate temporary password<br/>and show once"]
+        H8["Deactivate or reactivate account"]
+        H9["Archive or restore homeowner"]
+        V1["Open Pending Residents"]
+        V2["Review application and ID images"]
+        V3{"ID images complete?"}
+        V4["Approval unavailable; show message"]
+        V5{"Approve application?"}
+        V6["Set status active and dues start month;<br/>log action"]
+        V7["No system action:<br/>application remains pending"]
+        H1 -->|Add| H2 --> H3
+        H3 -->|No| H3E --> H2
+        H3 -->|Yes| H3S --> H1
+        H1 -->|View| H4 --> H5
+        H5 -->|Edit| H6 --> H3
+        H5 -->|Reset password| H7 --> H4
+        H5 -->|Change status| H8 --> H4
+        H5 -->|Back| H1
+        H1 -->|Archive or restore| H9 --> H1
+        H1 -->|Pending Residents| V1 --> V2 --> V3
+        V3 -->|No| V4 --> V1
+        V3 -->|Yes| V5
+        V5 -->|Yes| V6 --> V1
+        V5 -->|No| V7 --> V1
+    end
+    H1 -->|Back| A2(("A"))
+
+    MENU -->|Payments| Y1
+    subgraph PAYM["Online Payment Management and Monitoring"]
+        Y1["Show payment records from online<br/>and manual sources"]
+        Y2{"Select payment action"}
+        Y3[/"Search or filter records"/]
+        Y4["Export CSV"]
+        Y5["View receipt"]
+        Y6["Archive or restore receipt"]
+        Y7[/"Enter manual payment:<br/>month, date, method, reference"/]
+        Y8{"Payment details valid?"}
+        Y9["Show error"]
+        Y10["Record manual payment"]
+        Y11["Compose payment reminder"]
+        Y12{"Email sent?"}
+        Y13["Log reminder and show success"]
+        Y14["Show email error"]
+        Y1 --> Y2
+        Y2 -->|Search or filter| Y3 --> Y1
+        Y2 -->|Export| Y4 --> Y1
+        Y2 -->|Receipt| Y5 --> Y1
+        Y2 -->|Archive or restore| Y6 --> Y1
+        Y2 -->|Record payment| Y7 --> Y8
+        Y8 -->|No| Y9 --> Y7
+        Y8 -->|Yes| Y10 --> Y1
+        Y2 -->|Send reminder| Y11 --> Y12
+        Y12 -->|Yes| Y13 --> Y1
+        Y12 -->|No| Y14 --> Y1
+    end
+    Y2 -->|Back| A3(("A"))
+
+    MENU -->|Reservations| R1
+    subgraph RESV["Facility Reservation Management"]
+        R1["Show reservations by street, with status<br/>and payment information"]
+        R2{"Select reservation action"}
+        R3{"Overlaps an approved booking?"}
+        R4["Block approval and show message"]
+        R5["Set status approved and log action"]
+        R6["Set status rejected and log action"]
+        R7["Archive or restore reservation"]
+        R1 --> R2
+        R2 -->|"Approve pending"| R3
+        R3 -->|Yes| R4 --> R1
+        R3 -->|No| R5 --> R1
+        R2 -->|"Reject pending"| R6 --> R1
+        R2 -->|Archive or restore| R7 --> R1
+    end
+    R2 -->|Back| A4(("A"))
+
+    MENU -->|"Post Announcement"| B1
+    subgraph ANN["Announcements Management"]
+        B1["Show announcements"]
+        B2{"Select announcement action"}
+        B3[/"Enter title and message"/]
+        B4{"Both fields filled?"}
+        B5["Show error"]
+        B6["Post announcement and log action"]
+        B7["Archive or restore announcement"]
+        B1 --> B2
+        B2 -->|Post| B3 --> B4
+        B4 -->|No| B5 --> B3
+        B4 -->|Yes| B6 --> B1
+        B2 -->|Archive or restore| B7 --> B1
+    end
+    B2 -->|Back| A5(("A"))
+
+    MENU -->|"Resident Feedback"| F1
+    subgraph FEED["Suggestions, Concerns, and Incident Management"]
+        F1["Show suggestions, concerns,<br/>and incident reports"]
+        F2{"Select feedback action"}
+        F3[/"Set status and write reply"/]
+        F4{"Status and reply valid?"}
+        F5["Show error"]
+        F6["Save status and reply"]
+        F7["Archive or restore feedback"]
+        F1 --> F2
+        F2 -->|Update or reply| F3 --> F4
+        F4 -->|No| F5 --> F3
+        F4 -->|Yes| F6 --> F1
+        F2 -->|Archive or restore| F7 --> F1
+    end
+    F2 -->|Back| A6(("A"))
+
+    MENU -->|"Settings or Manage Dues"| S1
+    subgraph SET["Settings"]
+        S1{"Select setting"}
+        S2[/"Enter current and new password"/]
+        S3{"Password details valid?"}
+        S4["Show error"]
+        S5["Update password"]
+        S6[/"Adjust monthly dues per homeowner"/]
+        S7{"Amounts valid?"}
+        S8["Show error"]
+        S9["Save monthly dues"]
+        S1 -->|Change password| S2 --> S3
+        S3 -->|No| S4 --> S2
+        S3 -->|Yes| S5
+        S1 -->|Manage dues| S6 --> S7
+        S7 -->|No| S8 --> S6
+        S7 -->|Yes| S9
+    end
+    S1 -->|Back| A7(("A"))
+    S5 --> A7
+    S9 --> A7
+
+    MENU -->|Logout| X1["Clear session and return to Login page"]
+    X1 --> ENDALL([End])
+
+    classDef term fill:#0F6B5A,color:#ffffff,stroke:#0F6B5A
+    classDef hub fill:#E3F2EE,stroke:#0F6B5A,stroke-width:3px
+    class START,ENDALL term
+    class DASH hub

@@ -1,5 +1,8 @@
+<?php
+$footerBasePath = isset($basePath) ? $basePath : (defined('BASE_PATH') ? BASE_PATH : '');
+?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= $basePath ?>/Assets/js/password-visibility.js?v=1"></script>
+    <script src="<?= htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') ?>/Assets/js/password-visibility.js?v=1"></script>
     <script>
     // Sidebar: collapse, mobile drawer, remembered collapsed state
     (function () {
@@ -49,8 +52,12 @@
             refreshTips();
         }
 
-        function closeDrawer() { root.classList.remove('sb-open'); }
-        function openDrawer()  { root.classList.add('sb-open'); }
+        function setDrawerOpen(isOpen) {
+            root.classList.toggle('sb-open', isOpen);
+            if (openBtn) openBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+        function closeDrawer() { setDrawerOpen(false); }
+        function openDrawer()  { setDrawerOpen(true); }
 
         // Initialize from the saved collapsed state.
         buildTips();
@@ -67,6 +74,11 @@
         sidebar.querySelectorAll('a.nav-link').forEach(function (a) {
             a.addEventListener('click', function () { if (!isDesktop()) closeDrawer(); });
         });
+        var mobileNav = document.querySelector('.mobile-bottom-nav');
+        var activeMobileLink = mobileNav && mobileNav.querySelector('a.active');
+        if (mobileNav && activeMobileLink && window.matchMedia('(max-width: 767.98px)').matches) {
+            mobileNav.scrollLeft = activeMobileLink.offsetLeft - (mobileNav.clientWidth - activeMobileLink.offsetWidth) / 2;
+        }
         window.addEventListener('resize', function () {
             if (isDesktop()) closeDrawer();
             refreshIcon();
@@ -148,6 +160,8 @@
         }
 
         window.showPageLoading = showPageLoading;
+        // A page restored with the Back button should never keep the overlay on
+        window.addEventListener('pageshow', hidePageLoading);
 
         function showLoading(element, text) {
             if (!element.dataset.originalContent) {
@@ -281,5 +295,6 @@
         });
     })();
     </script>
+    <script src="<?= htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') ?>/Assets/js/smooth-nav.js?v=2"></script>
 </body>
 </html>

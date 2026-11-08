@@ -104,9 +104,13 @@ $csrf = generateCsrfToken();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="../Assets/css/global.css" rel="stylesheet">
-    <link href="../Assets/css/components.css" rel="stylesheet">
-    <link href="../Assets/css/resident.css" rel="stylesheet">
+    <link href="../Assets/css/global.css?v=22" rel="stylesheet">
+    <link href="../Assets/css/components.css?v=21" rel="stylesheet">
+    <link href="../Assets/css/admin.css?v=27" rel="stylesheet">
+    <link href="../Assets/css/resident.css?v=23" rel="stylesheet">
+    <link href="../Assets/css/reference-theme.css?v=50" rel="stylesheet">
+    <link href="../Assets/css/responsive-fix.css?v=2" rel="stylesheet">
+    <link href="../Assets/css/fluid-layout.css?v=1" rel="stylesheet">
 </head>
 <body class="login-page">
 <div class="login-card">

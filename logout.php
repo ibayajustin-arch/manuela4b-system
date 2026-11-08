@@ -1,6 +1,15 @@
 <?php
 require_once 'config/init.php';
 
+// Only a real click may log out. Hover prefetches and background requests must not end the session.
+$fetchMode = $_SERVER['HTTP_SEC_FETCH_MODE'] ?? 'navigate';
+$fetchPurpose = strtolower(($_SERVER['HTTP_SEC_PURPOSE'] ?? '') . ' ' . ($_SERVER['HTTP_PURPOSE'] ?? ''));
+if ($fetchMode !== 'navigate' || strpos($fetchPurpose, 'prefetch') !== false) {
+    header('Cache-Control: no-store');
+    http_response_code(204);
+    exit;
+}
+
 // Unset all session variables
 $_SESSION = [];
 

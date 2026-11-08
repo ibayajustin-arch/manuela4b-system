@@ -1,0 +1,238 @@
+%%{init: {"theme":"neutral","flowchart":{"curve":"linear","nodeSpacing":30,"rankSpacing":40}}}%%
+%% Manuela 4B MIS - Resident Flowchart
+%% Connector A = return to Resident Dashboard. Connector B = return to Login.
+flowchart TD
+    START([Start]) --> HAS{"Has a resident account?"}
+    HAS -->|No| R1
+    HAS -->|Yes| CHOOSE
+
+    subgraph REG["Account Registration and Resident ID Submission"]
+        R1[/"Enter name, username, email, contact,<br/>street, house number, and password"/]
+        R2[/"Attach front and back of resident ID<br/>and agree to the Terms"/]
+        R3{"Details and ID images valid?"}
+        R4["Show validation error"]
+        R5{"Username available?"}
+        R6["Save account, resident record<br/>(status: pending), and ID images"]
+        R7{"Saved successfully?"}
+        R8["Roll back and show error"]
+        R9["Show: Application submitted,<br/>wait for admin verification"]
+        R1 --> R2 --> R3
+        R3 -->|No| R4 --> R1
+        R3 -->|Yes| R5
+        R5 -->|No| R4
+        R5 -->|Yes| R6 --> R7
+        R7 -->|No| R8 --> R1
+        R7 -->|Yes| R9
+    end
+    R9 --> ENDREG([End])
+
+    subgraph LOGIN["Login and Authentication"]
+        LB(("B")) --> CHOOSE
+        CHOOSE{"Select login option"}
+        CHOOSE -->|"Username, email, or phone"| L1
+        L1[/"Enter identifier and password"/]
+        L2{"Request valid and<br/>not locked out?"}
+        L3{"Credentials valid?"}
+        L4{"Resident account?"}
+        L5{"Account status active?"}
+        LE1["Show error or wait message"]
+        LE2["Show: Use the Admin login"]
+        LE3["Show: Awaiting admin verification<br/>or Account not active"]
+        LX1(("B"))
+        L1 --> L2
+        L2 -->|No| LE1 --> LX1
+        L2 -->|Yes| L3
+        L3 -->|No| LE1
+        L3 -->|Yes| L4
+        L4 -->|No| LE2 --> LX1
+        L4 -->|Yes| L5
+        L5 -->|No| LE3 --> LX1
+
+        CHOOSE -->|Google| G1
+        G1["Sign in with Google"]
+        G2{"Sign-in completed and<br/>account already linked?"}
+        G3["Show Google sign-in error"]
+        G1 --> G2
+        G2 -->|No| G3 --> LX1
+
+        CHOOSE -->|Forgot password| F1
+        F1[/"Enter identifier"/]
+        F2["Email 6-digit code if account exists"]
+        F3[/"Enter code"/]
+        F4{"Code correct and not expired?"}
+        F5[/"Enter new password"/]
+        F6{"New password valid?"}
+        F7["Update password and delete codes"]
+        F8["Show error; resend code if needed"]
+        F9["Show password error"]
+        F1 --> F2 --> F3 --> F4
+        F4 -->|No| F8 --> F3
+        F4 -->|Yes| F5 --> F6
+        F6 -->|No| F9 --> F5
+        F6 -->|Yes| F7 --> LX1
+    end
+
+    L5 -->|Yes| SESS["Start resident session"]
+    G2 -->|Yes| SESS
+    SESS --> DASH
+
+        CA(("A")) --> DASH
+        DASH["<b>Resident Dashboard (Profile Account page)</b><br/>Shows profile, photo, account status, block and lot,<br/>contact details, announcements,<br/>emergency and household details, notification bell"]
+        DASH --> MENU{"Select action or module"}
+
+    MENU -->|"View announcement"| D1["Open announcement details"]
+    D1 --> A1(("A"))
+    MENU -->|"Edit profile or household"| D2[/"Enter updated details"/]
+    D2 --> D3{"Details valid?"}
+    D3 -->|No| D4["Show error"] --> D2
+    D3 -->|Yes| D5["Save details"] --> A2(("A"))
+    MENU -->|"Upload photo"| D6[/"Choose photo"/]
+    D6 --> D7{"Photo valid?"}
+    D7 -->|No| D8["Show error"] --> A3(("A"))
+    D7 -->|Yes| D9["Save profile photo"] --> A3
+    MENU -->|Notifications| N1["View notifications:<br/>announcements, reservations, payments, replies"]
+    N1 --> A4(("A"))
+
+    MENU -->|Payments| P1
+    subgraph PAY["Online Payments: Monthly Dues"]
+        P1["Show balance or All Paid Up,<br/>and payment history"]
+        P2{"Select payment action"}
+        P3["View receipt"]
+        P4["Archive or restore receipt"]
+        P5[["Payment OTP Verification"]]
+        P6{"Linked record, valid period,<br/>and month not fully paid?"}
+        P7["Show message"]
+        P8{"PayMongo session created?"}
+        P9["Show error"]
+        P10[/"Pay with GCash or Maya on PayMongo"/]
+        P11{"Payment outcome"}
+        P12["Return to Payments; nothing recorded"]
+        P13{"PayMongo status succeeded?"}
+        P14["Record dues payment with<br/>PM- receipt number"]
+        P15["Show: Payment successful"]
+        P16["Show: Payment could not be verified"]
+        P1 --> P2
+        P2 -->|View receipt| P3 --> P1
+        P2 -->|Archive or restore| P4 --> P1
+        P2 -->|Pay dues| P5 --> P6
+        P6 -->|No| P7 --> P1
+        P6 -->|Yes| P8
+        P8 -->|No| P9 --> P1
+        P8 -->|Yes| P10 --> P11
+        P11 -->|Cancelled| P12 --> P1
+        P11 -->|Completed| P13
+        P13 -->|Yes| P14 --> P15 --> P1
+        P13 -->|No| P16 --> P1
+    end
+    P2 -->|Back| A5(("A"))
+
+    MENU -->|Reservations| V1
+    subgraph RES["Facility Reservation"]
+        V1["Show availability calendar<br/>and my reservations"]
+        V2{"Select reservation action"}
+        V3["View receipt"]
+        V4[["Payment OTP Verification"]]
+        V5[/"Enter facility, date, hours,<br/>and full or 50% downpayment"/]
+        V6{"Booking details valid?"}
+        V7{"Time slot available?"}
+        V8["Create reservation (pending, unpaid)<br/>and payment record (pending)"]
+        V9{"PayMongo session created?"}
+        V10["Roll back and show error"]
+        V11["Show error"]
+        V12[["Payment OTP Verification"]]
+        V13{"Slot free, not yet paid,<br/>and not rejected?"}
+        V14[/"Pay with GCash or Maya on PayMongo"/]
+        V15{"Payment outcome"}
+        V16["Keep reservation unpaid;<br/>Pay Now remains available"]
+        V17{"PayMongo status succeeded?"}
+        V18["Show: Check reservation status again"]
+        V19["Mark reservation and payment as paid"]
+        V20{"Overlaps an approved booking?"}
+        V21["System auto-approves:<br/>status Confirmed"]
+        V22["Remains pending:<br/>Being reviewed by admin"]
+        V1 --> V2
+        V2 -->|View receipt| V3 --> V1
+        V2 -->|Book| V4 --> V5 --> V6
+        V6 -->|No| V11 --> V1
+        V6 -->|Yes| V7
+        V7 -->|No| V11
+        V7 -->|Yes| V8 --> V9
+        V9 -->|No| V10 --> V1
+        V9 -->|Yes| V14
+        V2 -->|"Pay Now"| V12 --> V13
+        V13 -->|No| V11
+        V13 -->|Yes| V14
+        V14 --> V15
+        V15 -->|Cancelled| V16 --> V1
+        V15 -->|Completed| V17
+        V17 -->|No| V18 --> V1
+        V17 -->|Yes| V19 --> V20
+        V20 -->|No| V21 --> V1
+        V20 -->|Yes| V22 --> V1
+    end
+    V2 -->|Back| A6(("A"))
+
+    MENU -->|"Suggestions and Concerns"| C1
+    subgraph FB["Suggestions, Concerns, and Incident Reports"]
+        C1["Show my messages,<br/>status, and admin replies"]
+        C2{"Select feedback action"}
+        C3["Archive or restore message"]
+        C4{"Message type"}
+        C5[/"Enter subject and message"/]
+        C6[/"Enter incident details, location,<br/>urgency, and photos"/]
+        C7{"Input valid?"}
+        C8["Show error"]
+        C9["Save message (status: new)"]
+        C1 --> C2
+        C2 -->|Archive or restore| C3 --> C1
+        C2 -->|Submit| C4
+        C4 -->|"Suggestion or concern"| C5 --> C7
+        C4 -->|Incident| C6 --> C7
+        C7 -->|No| C8 --> C4
+        C7 -->|Yes| C9 --> C1
+    end
+    C2 -->|Back| A7(("A"))
+
+    MENU -->|Settings| S1
+    subgraph SET["Settings"]
+        S1{"Select setting"}
+        S2[/"Enter current and new password"/]
+        S3{"Password details valid?"}
+        S4["Show error"]
+        S5["Update password"]
+        S6["Connect or disconnect Google account"]
+        S1 -->|Change password| S2 --> S3
+        S3 -->|No| S4 --> S2
+        S3 -->|Yes| S5
+        S1 -->|Connected accounts| S6
+    end
+    S1 -->|Back| A8(("A"))
+    S5 --> A8
+    S6 --> A8
+
+    subgraph OTP["Predefined Process: Payment OTP Verification"]
+        O1{"Verified in the last 10 minutes?"}
+        O2["Email 6-digit code"]
+        O3{"Code sent?"}
+        O4["Show error; ask admin to check email"]
+        O5[/"Enter code"/]
+        O6{"Code correct and not expired?"}
+        O7["Show error; request new code if needed"]
+        O8(["Continue to payment step"])
+        O9(["Stop payment step"])
+        O0(["Start payment verification"]) --> O1
+        O1 -->|Yes| O8
+        O1 -->|No| O2 --> O3
+        O3 -->|No| O4 --> O9
+        O3 -->|Yes| O5 --> O6
+        O6 -->|No| O7 --> O5
+        O6 -->|Yes| O8
+    end
+
+    MENU -->|Logout| X1["Clear session and return to Login page"]
+    X1 --> ENDALL([End])
+
+    classDef term fill:#0F6B5A,color:#ffffff,stroke:#0F6B5A
+    classDef hub fill:#E3F2EE,stroke:#0F6B5A,stroke-width:3px
+    class START,ENDREG,ENDALL,O0,O8,O9 term
+    class DASH hub

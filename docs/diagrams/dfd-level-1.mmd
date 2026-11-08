@@ -1,0 +1,112 @@
+%%{init: {"theme":"neutral","flowchart":{"curve":"basis","nodeSpacing":12,"rankSpacing":45}}}%%
+%% Manuela 4B MIS - Level 1 Data Flow Diagram
+%% Gane-Sarson style: square = external entity, rounded = process, side-barred box = data store.
+%% * = repeated symbol. An entity or data store is repeated to avoid crossing flow lines.
+%% A double-headed flow means the process both reads and writes the store.
+flowchart LR
+    P1("<b>1.0</b><br/>Account Registration<br/>and Authentication")
+    P2("<b>2.0</b><br/>Resident Verification and<br/>Homeowner Management")
+    P3("<b>3.0</b><br/>Facility Reservation<br/>Management")
+    P4("<b>4.0</b><br/>Online Payment and<br/>Dues Management")
+    P5("<b>5.0</b><br/>Suggestions, Concerns,<br/>and Incident Management")
+    P6("<b>6.0</b><br/>Announcements<br/>Management")
+    P7("<b>7.0</b><br/>Dashboards, Notifications,<br/>and Visual Data Analytics")
+
+    H1[" "] ~~~ P1
+    H6[" "] ~~~ P6
+
+    %% 1.0 Account Registration and Authentication
+    R1["Resident *"] --- F1["Registration details and<br/>ID images"] --> P1
+    R1 --- F2["Login credentials and<br/>password requests"] --> P1
+    P1 --- F3["Application status and<br/>login results"] --> R1
+    A1["Admin *"] --- F4["Admin login credentials<br/>and password changes"] --> P1
+    P1 --- F5["Admin login results"] --> A1
+    P1 --- F6["Authorization and token<br/>requests"] --> GOO["Google OAuth"]
+    GOO --- F7["Verified Google profile"] --> P1
+    P1 --- F8["Password reset OTP emails"] --> EM1["Email Service (SMTP) *"]
+    P1 <-->|"Account records"| D1a[["D1 | users *"]]
+    P1 <-->|"Resident records"| D2a[["D2 | homeowners *"]]
+    P1 <-->|"OTP records"| D10a[["D10 | otp_codes *"]]
+    P1 <-->|"Login attempt records"| D11[["D11 | login_attempts"]]
+    P1 <-->|"Linked account records"| D12[["D12 | user_identities"]]
+    P1 -->|"ID images"| D13a[["D13 | Verification ID files *"]]
+
+    %% 2.0 Resident Verification and Homeowner Management
+    R2["Resident *"] --- F9["Profile, photo, and<br/>household updates"] --> P2
+    P2 --- F10["Profile update results"] --> R2
+    A2["Admin *"] --- F11["Verification decisions<br/>and homeowner records"] --> P2
+    P2 --- F12["Pending applications, ID<br/>images, and homeowner<br/>information"] --> A2
+    P2 <-->|"Account records"| D1b[["D1 | users *"]]
+    P2 <-->|"Resident records"| D2b[["D2 | homeowners *"]]
+    D13b[["D13 | Verification ID files *"]] -->|"ID images"| P2
+    D3b[["D3 | payments *"]] -->|"Payment records"| P2
+    D4b[["D4 | reservations *"]] -->|"Reservation records"| P2
+    P2 <-->|"Activity records"| D9b[["D9 | activity_log *"]]
+
+    %% 3.0 Facility Reservation Management
+    R3["Resident *"] --- F13["Reservation details"] --> P3
+    P3 --- F14["Availability and<br/>reservation status"] --> R3
+    A3["Admin *"] --- F15["Reservation decisions"] --> P3
+    P3 --- F16["Reservation information"] --> A3
+    P3 <-->|"Reservation records"| D4c[["D4 | reservations *"]]
+    P3 <-->|"Reservation payment<br/>records"| D5c[["D5 | reservation_payments *"]]
+    D1c[["D1 | users *"]] -->|"Account records"| P3
+    D2c[["D2 | homeowners *"]] -->|"Resident records"| P3
+    P3 -->|"Activity records"| D9c[["D9 | activity_log *"]]
+
+    %% 4.0 Online Payment and Dues Management
+    R4["Resident *"] --- F17["Payment requests, OTP<br/>codes, and receipt<br/>actions"] --> P4
+    P4 --- F18["Balance, payment history,<br/>and receipts"] --> R4
+    A4["Admin *"] --- F19["Dues changes, manual<br/>payments, reminder<br/>requests, and receipt<br/>actions"] --> P4
+    P4 --- F20["Payment records,<br/>receipts, and CSV exports"] --> A4
+    P4 --- F21["Checkout session requests<br/>and status queries"] --> PMG["PayMongo Payment Gateway"]
+    PMG --- F22["Checkout details, payment<br/>status, and webhook<br/>events"] --> P4
+    P4 --- F23["Payment OTP and reminder<br/>emails"] --> EM2["Email Service (SMTP) *"]
+    EM2 --- F24["Email send status"] --> P4
+    P4 <-->|"Dues payment records"| D3d[["D3 | payments *"]]
+    P4 <-->|"Reservation payment<br/>records"| D5d[["D5 | reservation_payments *"]]
+    P4 <-->|"Reservation payment and<br/>approval status"| D4d[["D4 | reservations *"]]
+    P4 <-->|"Resident and dues<br/>records"| D2d[["D2 | homeowners *"]]
+    P4 <-->|"OTP records"| D10d[["D10 | otp_codes *"]]
+    D1d[["D1 | users *"]] -->|"Account records"| P4
+    P4 -->|"Activity records"| D9d[["D9 | activity_log *"]]
+
+    %% 5.0 Suggestions, Concerns, and Incident Management
+    R5["Resident *"] --- F25["Feedback and incident<br/>reports"] --> P5
+    P5 --- F26["Feedback status and<br/>replies"] --> R5
+    A5["Admin *"] --- F27["Feedback status updates<br/>and replies"] --> P5
+    P5 --- F28["Feedback and incident<br/>details"] --> A5
+    P5 <-->|"Feedback records"| D7e[["D7 | resident_feedback *"]]
+    P5 <-->|"Incident photo records"| D8[["D8 | resident_feedback_photos"]]
+    D1e[["D1 | users *"]] -->|"Account records"| P5
+    D2e[["D2 | homeowners *"]] -->|"Resident records"| P5
+
+    %% 6.0 Announcements Management
+    A6["Admin *"] --- F29["Announcement details"] --> P6
+    P6 --- F30["Announcement listings"] --> A6
+    P6 <-->|"Announcement records"| D6f[["D6 | announcements *"]]
+    D1f[["D1 | users *"]] -->|"Account records"| P6
+    P6 -->|"Activity records"| D9f[["D9 | activity_log *"]]
+
+    %% 7.0 Dashboards, Notifications, and Visual Data Analytics
+    A7["Admin *"] --- F31["Analytics filters"] --> P7
+    P7 --- F32["Admin Dashboard KPIs,<br/>notifications, and<br/>analytics"] --> A7
+    P7 --- F33["Resident Dashboard<br/>information,<br/>announcements, and<br/>notifications"] --> R7["Resident *"]
+    D1g[["D1 | users *"]] -->|"Account records"| P7
+    D2g[["D2 | homeowners *"]] -->|"Resident records"| P7
+    D3g[["D3 | payments *"]] -->|"Payment records"| P7
+    D4g[["D4 | reservations *"]] -->|"Reservation records"| P7
+    D6g[["D6 | announcements *"]] -->|"Announcement records"| P7
+    D7g[["D7 | resident_feedback *"]] -->|"Feedback records"| P7
+    D9g[["D9 | activity_log *"]] -->|"Activity records"| P7
+
+    classDef entity fill:#ffffff,stroke:#222222,stroke-width:2px,color:#111111
+    classDef process fill:#E3F2EE,stroke:#0F6B5A,stroke-width:3px,color:#111111
+    classDef store fill:#F5F5F5,stroke:#555555,color:#111111
+    class R1,R2,R3,R4,R5,R7,A1,A2,A3,A4,A5,A6,A7,GOO,PMG,EM1,EM2 entity
+    class P1,P2,P3,P4,P5,P6,P7 process
+    classDef hidden fill:none,stroke:none,color:transparent
+    class H1,H6 hidden
+    class D1a,D1b,D1c,D1d,D1e,D1f,D1g,D2a,D2b,D2c,D2d,D2e,D2g,D3b,D3d,D3g,D4b,D4c,D4d,D4g,D5c,D5d,D6f,D6g,D7e,D7g,D8,D9b,D9c,D9d,D9f,D9g,D10a,D10d,D11,D12,D13a,D13b store
+    classDef flow fill:#ffffff,stroke:none,color:#111111
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,F23,F24,F25,F26,F27,F28,F29,F30,F31,F32,F33 flow

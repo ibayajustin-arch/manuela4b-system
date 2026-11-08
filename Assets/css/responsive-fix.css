@@ -1,0 +1,712 @@
+/* ========================================================
+   RESPONSIVE FIX  (STEP 1)
+   Load this LAST, after reference-theme.css:
+   global > components > admin > resident > analytics > reference-theme > responsive-fix
+
+   What it fixes
+   1. Buttons: small, neat, auto-width (no more long rectangles)
+   2. Consistent spacing, gutters, and equal-height cards
+   3. One clean set of breakpoints: desktop / tablet / mobile
+   4. Page headers, modal footers, forms, tables that stay aligned
+   ======================================================== */
+
+:root {
+  /* One scale used everywhere in this file */
+  --ctl-h: 40px;          /* normal button height */
+  --ctl-h-sm: 40px;       /* compact controls still meet the tap target */
+  --ctl-h-lg: 46px;       /* large button height */
+  --field-h: 44px;        /* inputs and selects */
+  --gap-page: 1.25rem;    /* space between cards/rows on desktop */
+  --gap-page-sm: 0.85rem; /* space between cards/rows on mobile */
+}
+
+/* --------------------------------------------------------
+   0. SAFETY NET
+   -------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+html body {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------
+   1. BUTTONS
+   Every .btn gets the same compact size, never stretches.
+   Icon-only buttons and special controls are excluded.
+   -------------------------------------------------------- */
+html body .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+html body .main-content .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+html body .modal .btn:not(.btn-icon):not(.btn-close),
+html body .offcanvas .btn:not(.btn-icon):not(.btn-close) {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 0 auto;
+  min-height: var(--ctl-h);
+  padding: 0.45rem 1.05rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  gap: 0.45rem;
+}
+
+html body .btn-sm:not(.homeowner-action-btn),
+html body .main-content .btn-sm:not(.homeowner-action-btn),
+html body .modal .btn-sm {
+  min-height: var(--ctl-h-sm);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+html body .btn-lg,
+html body .main-content .btn-lg,
+html body .modal .btn-lg {
+  min-height: var(--ctl-h-lg);
+  padding: 0.55rem 1.4rem;
+  font-size: 1rem;
+}
+
+/* Icon-only buttons stay perfect squares */
+html body .btn-icon,
+html body .main-content .btn-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+html body .homeowner-actions .homeowner-action-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+html body .btn-close,
+html body .password-visibility-toggle--icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  flex: 0 0 40px;
+}
+
+html body .app-wrapper:has(> .mobile-bottom-nav-admin) > .sidebar .sidebar-toggle {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* The bell and sidebar open button keep one size on every screen */
+html body .btn-topbar-bell {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+/* Button groups: buttons sit side by side, never stretch to a full row */
+html body .btn-group,
+html body .main-content .btn-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  width: auto;
+  max-width: 100%;
+}
+
+html body .btn-group > .btn,
+html body .main-content .btn-group > .btn {
+  flex: 0 0 auto;
+  border-radius: 10px !important;
+}
+
+/* Login and register submit buttons are the one place full width is right,
+   but they should not be tall. */
+html body .login-left-inner .btn-primary,
+html body .register-page .register-submit {
+  width: 100%;
+  min-height: var(--ctl-h-lg);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+/* Keep payment actions compact without forcing them to fill their cell. */
+html body .payment-record-actions .btn {
+  width: auto;
+  min-height: var(--ctl-h-sm);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+html body .payment-record-actions {
+  align-items: flex-start;
+}
+
+/* A rule-of-thumb for buttons placed next to each other anywhere */
+html body .main-content .d-flex.gap-1 > .btn,
+html body .main-content .d-flex.gap-2 > .btn,
+html body .main-content .d-flex.gap-3 > .btn {
+  flex: 0 0 auto;
+}
+
+/* --------------------------------------------------------
+   2. FORMS: one consistent field height
+   -------------------------------------------------------- */
+html body .form-control,
+html body .form-select,
+html body textarea,
+html body .main-content .form-control,
+html body .main-content .form-select,
+html body .register-page .register-form-grid .form-control,
+html body .register-page .register-form-grid .form-select,
+html body .modal .form-control,
+html body .modal .form-select,
+html body .login-left-inner .form-control,
+html body .login-left-inner .form-select,
+html body .input-group-text {
+  min-height: var(--field-h);
+  padding: 0.5rem 0.85rem;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+html body .main-content textarea.form-control,
+html body .modal textarea.form-control {
+  min-height: 96px;
+}
+
+html body .main-content select.form-select,
+html body .main-content select {
+  min-height: var(--field-h);
+}
+
+html body .form-label,
+html body .register-page .register-form-grid .form-label {
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+}
+
+/* --------------------------------------------------------
+   3. PAGE LAYOUT, SPACING, GRID
+   -------------------------------------------------------- */
+html body .main-content > .container-fluid,
+html body .main-content > .container {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  min-width: 0;
+}
+
+/* Same gutters on every row inside the content area */
+html body .main-content .row {
+  --bs-gutter-x: var(--gap-page);
+  --bs-gutter-y: var(--gap-page);
+}
+
+/* Cards in the same row get the same height */
+html body .main-content .row > [class*="col"] > .card,
+html body .main-content .row > [class*="col"] > a > .card {
+  height: 100%;
+}
+
+/* Page header: title left, actions right, wraps cleanly */
+html body .main-content .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+html body .main-content .page-header > div:first-child {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+html body .main-content .page-header .btn,
+html body .main-content .page-header .btn-group {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+html body .main-content .page-header .dashboard-view-analytics:not(.w-100) {
+  width: auto !important;
+}
+
+html body .main-content .page-header > .d-flex,
+html body .main-content .page-header > div.d-flex,
+html body .homeowners-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: auto;
+}
+
+/* Card headers and bodies: one rhythm */
+html body .main-content .card-header {
+  padding: 0.9rem 1.25rem;
+  font-size: 1.02rem;
+}
+
+html body .main-content .card-body {
+  padding: 1.25rem;
+}
+
+/* KPI and stat cards: tidy heights instead of huge empty boxes */
+html body .dashboard-kpi-row .stat-card-pastel,
+html body .dashboard-kpi-row .card-body.stat-card {
+  min-height: 160px;
+}
+
+html body .resident-payments-page .payment-balance-card,
+html body .resident-payments-page .stat-card {
+  min-height: 200px;
+}
+
+html body .homeowner-summary-card {
+  min-height: 150px;
+}
+
+/* Tables: header and cells line up, never wrap in nasty ways */
+html body .main-content .table th,
+html body .main-content .table td {
+  padding: 0.75rem 0.9rem;
+  vertical-align: middle;
+}
+
+html body .main-content .table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Modals: footer buttons sit to the right, side by side */
+html body .modal-footer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+html body .modal-footer > .btn,
+html body .modal-footer > button,
+html body .modal-footer > a {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: var(--ctl-h);
+  margin: 0 !important;
+}
+
+/* Heatmap squares and toggles keep their own size */
+html body .main-content .an-heat-cell {
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+html body .analytics-page .an-toggle button {
+  min-height: var(--ctl-h);
+  padding: 0.3rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+html body .main-content :where(button:not(.btn), input[type="submit"]:not(.btn), input[type="button"]:not(.btn)) {
+  min-height: var(--ctl-h);
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------
+   4. TABLET  (768px to 1199px)
+   -------------------------------------------------------- */
+@media (max-width: 1199.98px) {
+  html body .main-content .row {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+  }
+
+  html body .dashboard-kpi-row .stat-card-pastel,
+  html body .dashboard-kpi-row .card-body.stat-card {
+    min-height: 140px;
+  }
+
+  html body .main-content .card-body {
+    padding: 1.1rem;
+  }
+}
+
+/* --------------------------------------------------------
+   5. MOBILE  (up to 767px)
+   -------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  html,
+  html body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  html body .main-content,
+  html body .main-content > .container,
+  html body .main-content > .container-fluid,
+  html body .main-content .row,
+  html body .main-content .row > *,
+  html body .main-content .card,
+  html body .main-content .card-body {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html body .main-content :where(p, h1, h2, h3, h4, h5, h6, label, a, span, small, strong, td, th, li) {
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  html body .main-content .row {
+    --bs-gutter-x: var(--gap-page-sm);
+    --bs-gutter-y: var(--gap-page-sm);
+  }
+
+  /* Buttons stay small. They wrap onto a new line instead of stretching. */
+  html body .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+  html body .main-content .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+  html body .modal .btn:not(.btn-icon):not(.btn-close),
+  html body .offcanvas .btn:not(.btn-icon):not(.btn-close) {
+    min-height: var(--ctl-h);
+    padding: 0.45rem 0.95rem;
+    font-size: 0.9rem;
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  html body .btn.btn-lg:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+  html body .main-content .btn.btn-lg:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+  html body .modal .btn.btn-lg:not(.btn-icon):not(.btn-close),
+  html body .offcanvas .btn.btn-lg:not(.btn-icon):not(.btn-close) {
+    min-height: var(--ctl-h-lg);
+  }
+
+  html body .main-content .btn-sm:not(.homeowner-action-btn),
+  html body .modal .btn-sm {
+    min-height: var(--ctl-h-sm);
+    padding: 0.3rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  html body .main-content .btn:not(.btn-icon) i,
+  html body .main-content .btn:not(.btn-icon) svg {
+    flex: 0 0 auto;
+  }
+
+  /* Page header stacks: title first, actions below, left aligned */
+  html body .main-content .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.1rem;
+  }
+
+  html body .main-content .page-header > div:first-child {
+    flex: 1 1 auto;
+  }
+
+  html body .main-content .page-header > .d-flex,
+  html body .main-content .page-header > div.d-flex,
+  html body .homeowners-page-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  html body .main-content .page-header > .btn,
+  html body .main-content .page-header > div > .btn,
+  html body .main-content .page-header > .d-flex > .btn,
+  html body .main-content .page-header > div.d-flex > .btn {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  html body .main-content .page-header .dashboard-view-analytics:not(.w-100) {
+    align-self: flex-start;
+  }
+
+  html body .main-content .page-header h1 {
+    font-size: clamp(1.35rem, 5.5vw, 1.7rem);
+    line-height: 1.25;
+  }
+
+  /* Inputs: 16px stops iPhones from zooming in when tapped */
+  html body .main-content .form-control,
+  html body .main-content .form-select,
+  html body .main-content textarea,
+  html body .register-page .register-form-grid .form-control,
+  html body .register-page .register-form-grid .form-select,
+  html body .modal .form-control,
+  html body .modal .form-select {
+    min-height: var(--field-h);
+    font-size: 16px !important;
+  }
+
+  html body .login-left-inner .form-control,
+  html body .login-left-inner .form-select {
+    min-height: var(--field-h);
+    font-size: 16px !important;
+  }
+
+  html body .form-label,
+  html body .register-page .register-form-grid .form-label {
+    font-size: 16px;
+  }
+
+  /* Cards */
+  html body .main-content .card-body {
+    padding: 1rem;
+  }
+
+  html body .main-content .card-header {
+    padding: 0.8rem 1rem;
+    font-size: 0.98rem;
+  }
+
+  html body .dashboard-kpi-row .stat-card-pastel,
+  html body .dashboard-kpi-row .card-body.stat-card,
+  html body .resident-payments-page .payment-balance-card,
+  html body .resident-payments-page .stat-card,
+  html body .homeowner-summary-card {
+    min-height: 0;
+  }
+
+  /* Modals: footer buttons stay side by side and right aligned */
+  html body .modal-footer {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end;
+  }
+
+  html body .modal-footer > .btn,
+  html body .modal-footer > button,
+  html body .modal-footer > a {
+    width: auto !important;
+    flex: 0 0 auto;
+    min-height: var(--ctl-h);
+    margin: 0 !important;
+  }
+
+  /* Tables that remain tables keep a sensible width and scroll sideways */
+  html body .main-content .table th,
+  html body .main-content .table td {
+    padding: 0.6rem 0.6rem;
+    font-size: 1rem;
+  }
+}
+
+/* --------------------------------------------------------
+   6. SMALL PHONES  (up to 480px)
+   -------------------------------------------------------- */
+@media (max-width: 480.98px) {
+  html body .main-content .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle),
+  html body .modal .btn:not(.btn-icon):not(.btn-close) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  /* Allow a long label to wrap rather than run off the screen */
+  html body .main-content .btn:not(.btn-icon):not(.btn-sm) {
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  html body .main-content .card-body {
+    padding: 0.9rem;
+  }
+}
+
+/* --------------------------------------------------------
+   7. LARGE SCREENS  (1600px and up): keep lines readable
+   -------------------------------------------------------- */
+@media (min-width: 1600px) {
+  html body .main-content > .container-fluid {
+    max-width: 1760px;
+  }
+}
+
+/* Admin reservations: keep the table desktop-only and make compact cards on phones. */
+@media (max-width: 767.98px) {
+  .main-content.page-admin-reservations .table-responsive:has(.admin-reservations-table) {
+    overflow: visible;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table thead {
+    display: none;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody tr:not(:has(.table-empty-state)) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas:
+      "facility facility"
+      "resident resident"
+      "date time"
+      "payment status"
+      "actions actions";
+    align-items: start;
+    gap: 0.35rem 0.65rem;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #dce7e2);
+    border-radius: 12px;
+    background: var(--card-bg, #fff);
+    box-shadow: 0 2px 8px rgba(15, 60, 50, 0.05);
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody tr:has(.table-empty-state) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td {
+    display: block;
+    min-width: 0;
+    padding: 0.1rem 0 !important;
+    border: 0;
+    background: transparent;
+    font-size: 1rem;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td::before {
+    display: block;
+    margin-bottom: 0.1rem;
+    color: var(--text-muted, #687a73);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: normal;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(1) {
+    grid-area: facility;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(2) {
+    grid-area: resident;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(3) {
+    grid-area: date;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(4) {
+    grid-area: time;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(5) {
+    grid-area: payment;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(6) {
+    grid-area: status;
+    text-align: right;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child {
+    grid-area: actions;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    padding-top: 0.55rem !important;
+    border-top: 1px solid var(--border-color, #dce7e2);
+    position: static;
+    box-shadow: none;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child::before {
+    display: none;
+    content: none;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td form {
+    display: inline-flex;
+    margin: 0;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td .btn {
+    width: auto;
+    min-width: 40px;
+    min-height: 40px;
+    margin: 0 !important;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(5) .btn {
+    margin-top: 0.3rem !important;
+  }
+
+  .app-wrapper:has(.page-admin-reservations) .mobile-topbar-brand {
+    font-size: 0.95rem;
+  }
+
+  .app-wrapper:has(.page-admin-reservations) .sidebar-logo-box {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-wrapper:has(.page-admin-reservations) .sidebar-brand-text .brand-name {
+    font-size: 1rem;
+  }
+}

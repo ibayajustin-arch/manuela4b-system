@@ -9,11 +9,13 @@ $isPost = ($_SERVER['REQUEST_METHOD'] === 'POST');
 $in     = $isPost ? $_POST : $_GET;
 $name   = $in['provider'] ?? '';
 $mode   = (($in['mode'] ?? '') === 'connect') ? 'connect' : 'login';
+$loginRole = $mode === 'login' && ($in['login_role'] ?? '') === 'admin' ? 'admin' : '';
+$loginPath = $loginRole === 'admin' ? '/admin/login.php' : '/login.php';
 
 $p = oauth_provider($name);
 if (!$p) {
     $_SESSION['login_error'] = "That login method is not available yet.";
-    header("Location: " . BASE_PATH . "/login.php");
+    header("Location: " . BASE_PATH . $loginPath);
     exit;
 }
 
@@ -49,6 +51,7 @@ $_SESSION['oauth_state']    = $state;
 $_SESSION['oauth_verifier'] = $verifier;
 $_SESSION['oauth_provider'] = $name;
 $_SESSION['oauth_mode']     = $mode;
+$_SESSION['oauth_login_role'] = $loginRole;
 
 $params = [
     'client_id'             => $p['client_id'],

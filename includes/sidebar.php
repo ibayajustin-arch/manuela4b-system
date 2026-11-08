@@ -2,10 +2,11 @@
 $basePath = defined('BASE_PATH') ? BASE_PATH : '';
 $current_page = strtolower(basename($_SERVER['PHP_SELF']));
 $sidebarUserName = (string) ($_SESSION['full_name'] ?? 'User');
+$sidebarPhotoUrl = '';
 
 // Keep the admin label current when the profile name is changed while logged in.
 if (($_SESSION['role'] ?? '') === 'admin' && isset($conn) && $conn instanceof mysqli && !empty($_SESSION['user_id'])) {
-    $nameStmt = $conn->prepare("SELECT full_name FROM users WHERE id = ? AND role = 'admin' LIMIT 1");
+    $nameStmt = $conn->prepare("SELECT full_name, profile_photo FROM users WHERE id = ? AND role = 'admin' LIMIT 1");
     if ($nameStmt) {
         $nameStmt->bind_param('i', $_SESSION['user_id']);
         if ($nameStmt->execute()) {
@@ -13,6 +14,11 @@ if (($_SESSION['role'] ?? '') === 'admin' && isset($conn) && $conn instanceof my
             if (!empty($nameRow['full_name'])) {
                 $sidebarUserName = (string) $nameRow['full_name'];
                 $_SESSION['full_name'] = $sidebarUserName;
+            }
+            $sidebarPhotoPath = (string) ($nameRow['profile_photo'] ?? '');
+            $sidebarPhotoFile = __DIR__ . '/../' . $sidebarPhotoPath;
+            if ($sidebarPhotoPath !== '' && is_file($sidebarPhotoFile)) {
+                $sidebarPhotoUrl = $basePath . '/' . $sidebarPhotoPath . '?v=' . filemtime($sidebarPhotoFile);
             }
         }
         $nameStmt->close();
@@ -114,19 +120,20 @@ if (isset($conn) && $conn instanceof mysqli) {
                 <!-- Admin Links -->
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/admin/dashboard.php" data-sb-label="Dashboard" class="nav-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">
-                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                        <i class="bi bi-grid" aria-hidden="true"></i>
                         <span class="nav-text">Dashboard</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= $basePath ?>/admin/analytics.php" data-sb-label="Visual Data Analytics" class="nav-link <?= $current_page === 'analytics.php' ? 'active' : '' ?>">
-                        <i class="bi bi-bar-chart-line"></i>
+                    <!-- Sections (Overview, Collections, ...) are tabs inside the analytics page -->
+                    <a href="<?= $basePath ?>/admin/analytics.php" data-sb-label="Visual Data Analytics" class="nav-link <?= $current_page === 'analytics.php' ? 'active' : '' ?>" <?= $current_page === 'analytics.php' ? 'aria-current="page"' : '' ?>>
+                        <i class="bi bi-bar-chart" aria-hidden="true"></i>
                         <span class="nav-text">Visual Data Analytics</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/admin/reservations.php" data-sb-label="Reservations" class="nav-link <?= $current_page === 'reservations.php' ? 'active' : '' ?>">
-                        <i class="bi bi-clipboard-data"></i>
+                        <i class="bi bi-calendar-check" aria-hidden="true"></i>
                         <span class="nav-text">Reservations</span>
                         <?php if ($pendingResCount > 0): ?>
                             <span class="sidebar-badge badge-warning" title="<?= $pendingResCount ?> pending reservation(s)">
@@ -137,25 +144,25 @@ if (isset($conn) && $conn instanceof mysqli) {
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/admin/homeowners.php" data-sb-label="Homeowners" class="nav-link <?= in_array($current_page, ['homeowners.php', 'homeowner_create.php', 'homeowner_edit.php', 'homeowner_view.php', 'homeowner_activity.php'], true) ? 'active' : '' ?>">
-                        <i class="bi bi-people"></i>
+                        <i class="bi bi-people" aria-hidden="true"></i>
                         <span class="nav-text">Homeowners</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= $basePath ?>/admin/payments.php" data-sb-label="Payments" class="nav-link <?= $current_page === 'payments.php' ? 'active' : '' ?>">
-                        <i class="bi bi-file-earmark-text"></i>
+                    <a href="<?= $basePath ?>/admin/payments.php" data-sb-label="Payments" class="nav-link <?= in_array($current_page, ['payments.php', 'edit_payment.php'], true) ? 'active' : '' ?>">
+                        <i class="bi bi-wallet2" aria-hidden="true"></i>
                         <span class="nav-text">Payments</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/admin/announcements.php" data-sb-label="Announcements" class="nav-link <?= $current_page === 'announcements.php' ? 'active' : '' ?>">
-                        <i class="bi bi-send"></i>
+                        <i class="bi bi-megaphone" aria-hidden="true"></i>
                         <span class="nav-text">Announcements</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/admin/feedback.php" data-sb-label="Resident Feedback" class="nav-link <?= $current_page === 'feedback.php' ? 'active' : '' ?>">
-                        <i class="bi bi-chat-square-text"></i>
+                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
                         <span class="nav-text">Resident Feedback</span>
                         <?php if ($newFeedbackCount > 0): ?>
                             <span class="sidebar-badge badge-danger" title="<?= $newFeedbackCount ?> new feedback message(s)">
@@ -167,26 +174,32 @@ if (isset($conn) && $conn instanceof mysqli) {
             <?php else: ?>
                 <!-- Resident Links -->
                 <li class="nav-item">
+                    <a href="<?= $basePath ?>/resident/dashboard.php" data-sb-label="Dashboard" class="nav-link <?= $current_page === 'dashboard.php' ? 'active' : '' ?>">
+                        <i class="bi bi-grid" aria-hidden="true"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="<?= $basePath ?>/resident/profile.php" data-sb-label="Profile Account" class="nav-link <?= $current_page === 'profile.php' ? 'active' : '' ?>">
-                        <i class="bi bi-person-circle"></i>
+                        <i class="bi bi-person" aria-hidden="true"></i>
                         <span class="nav-text">Profile Account</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= $basePath ?>/resident/payments.php" data-sb-label="Online Payment" class="nav-link <?= $current_page === 'payments.php' ? 'active' : '' ?>">
-                        <i class="bi bi-wallet-fill"></i>
-                        <span class="nav-text">Online Payment</span>
+                    <a href="<?= $basePath ?>/resident/payments.php" data-sb-label="Payments" class="nav-link <?= $current_page === 'payments.php' ? 'active' : '' ?>">
+                        <i class="bi bi-wallet2" aria-hidden="true"></i>
+                        <span class="nav-text">Payments</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/resident/reservations.php" data-sb-label="Facility Reservation" class="nav-link <?= $current_page === 'reservations.php' ? 'active' : '' ?>">
-                        <i class="bi bi-calendar-plus-fill"></i>
+                        <i class="bi bi-calendar-check" aria-hidden="true"></i>
                         <span class="nav-text">Facility Reservation</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="<?= $basePath ?>/resident/feedback.php" data-sb-label="Suggestions &amp; Concerns" class="nav-link <?= $current_page === 'feedback.php' ? 'active' : '' ?>">
-                        <i class="bi bi-chat-dots-fill"></i>
+                        <i class="bi bi-chat-dots" aria-hidden="true"></i>
                         <span class="nav-text">Suggestions &amp; Concerns</span>
                     </a>
                 </li>
@@ -194,7 +207,7 @@ if (isset($conn) && $conn instanceof mysqli) {
 
             <li class="nav-item">
                 <a href="<?= $basePath ?>/settings.php" data-sb-label="Settings" class="nav-link <?= $current_page === 'settings.php' ? 'active' : '' ?>">
-                    <i class="bi bi-brightness-high"></i>
+                    <i class="bi bi-gear" aria-hidden="true"></i>
                     <span class="nav-text">Settings</span>
                 </a>
             </li>
@@ -207,9 +220,15 @@ if (isset($conn) && $conn instanceof mysqli) {
         <?php if (isset($_SESSION['user_id'])): ?>
             <div class="sidebar-user" data-sb-label="<?= htmlspecialchars($sidebarUserName) ?>">
                 <div class="sidebar-user-avatar-wrap">
-                    <div class="avatar-circle sm">
-                        <?= strtoupper(substr($sidebarUserName, 0, 1)) ?>
-                    </div>
+                    <?php if ($sidebarPhotoUrl !== ''): ?>
+                        <div class="avatar-circle sm avatar-circle-photo">
+                            <img src="<?= htmlspecialchars($sidebarPhotoUrl, ENT_QUOTES, 'UTF-8') ?>" alt="">
+                        </div>
+                    <?php else: ?>
+                        <div class="avatar-circle sm">
+                            <?= strtoupper(substr($sidebarUserName, 0, 1)) ?>
+                        </div>
+                    <?php endif; ?>
                     <span class="user-status-dot" title="Active"></span>
                 </div>
                 <div class="sidebar-user-text text-truncate">
@@ -228,8 +247,55 @@ if (isset($conn) && $conn instanceof mysqli) {
 </aside>
 
 <?php if (isset($_SESSION['user_id']) && in_array(($_SESSION['role'] ?? ''), ['admin', 'homeowner', 'resident'], true)): ?>
+<nav class="mobile-bottom-nav <?= ($_SESSION['role'] ?? '') === 'admin' ? 'mobile-bottom-nav-admin' : 'mobile-bottom-nav-resident' ?>" aria-label="Main navigation">
+    <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>
+        <a href="<?= $basePath ?>/admin/dashboard.php" class="<?= $current_page === 'dashboard.php' ? 'active' : '' ?>" <?= $current_page === 'dashboard.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-house-door" aria-hidden="true"></i><span>Home</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/analytics.php" class="<?= $current_page === 'analytics.php' ? 'active' : '' ?>" <?= $current_page === 'analytics.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-bar-chart-line" aria-hidden="true"></i><span>Analytics</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/homeowners.php" class="<?= in_array($current_page, ['homeowners.php', 'homeowner_create.php', 'homeowner_edit.php', 'homeowner_view.php', 'homeowner_activity.php'], true) ? 'active' : '' ?>" <?= in_array($current_page, ['homeowners.php', 'homeowner_create.php', 'homeowner_edit.php', 'homeowner_view.php', 'homeowner_activity.php'], true) ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-people" aria-hidden="true"></i><span>Residents</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/reservations.php" class="<?= $current_page === 'reservations.php' ? 'active' : '' ?>" <?= $current_page === 'reservations.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-calendar2-check" aria-hidden="true"></i><span>Bookings</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/payments.php" class="<?= in_array($current_page, ['payments.php', 'record_payment.php', 'view_receipt.php'], true) ? 'active' : '' ?>" <?= in_array($current_page, ['payments.php', 'record_payment.php', 'view_receipt.php'], true) ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-wallet2" aria-hidden="true"></i><span>Payments</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/announcements.php" class="<?= $current_page === 'announcements.php' ? 'active' : '' ?>" <?= $current_page === 'announcements.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-megaphone" aria-hidden="true"></i><span>Announcements</span>
+        </a>
+        <a href="<?= $basePath ?>/admin/feedback.php" class="<?= $current_page === 'feedback.php' ? 'active' : '' ?>" <?= $current_page === 'feedback.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-chat-dots" aria-hidden="true"></i><span>Feedback</span>
+        </a>
+        <a href="<?= $basePath ?>/settings.php" class="<?= $current_page === 'settings.php' ? 'active' : '' ?>" <?= $current_page === 'settings.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-gear" aria-hidden="true"></i><span>Settings</span>
+        </a>
+    <?php else: ?>
+        <a href="<?= $basePath ?>/resident/dashboard.php" class="<?= $current_page === 'dashboard.php' ? 'active' : '' ?>" <?= $current_page === 'dashboard.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Dashboard</span>
+        </a>
+        <a href="<?= $basePath ?>/resident/payments.php" class="<?= in_array($current_page, ['payments.php', 'payment_archive.php'], true) ? 'active' : '' ?>" <?= in_array($current_page, ['payments.php', 'payment_archive.php'], true) ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-wallet2" aria-hidden="true"></i><span>Payments</span>
+        </a>
+        <a href="<?= $basePath ?>/resident/reservations.php" class="<?= in_array($current_page, ['reservations.php', 'pay_reservation.php'], true) ? 'active' : '' ?>" <?= in_array($current_page, ['reservations.php', 'pay_reservation.php'], true) ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-calendar2-check" aria-hidden="true"></i><span class="mbn-label-sm">Reservations</span>
+        </a>
+        <a href="<?= $basePath ?>/resident/feedback.php" class="<?= $current_page === 'feedback.php' ? 'active' : '' ?>" <?= $current_page === 'feedback.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-chat-dots" aria-hidden="true"></i><span class="mbn-label-2line">Suggestions<br>&amp; Concerns</span>
+        </a>
+        <a href="<?= $basePath ?>/settings.php" class="<?= $current_page === 'settings.php' ? 'active' : '' ?>" <?= $current_page === 'settings.php' ? 'aria-current="page"' : '' ?>>
+            <i class="bi bi-gear" aria-hidden="true"></i><span>Settings</span>
+        </a>
+    <?php endif; ?>
+</nav>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['user_id']) && in_array(($_SESSION['role'] ?? ''), ['admin', 'homeowner', 'resident'], true)): ?>
 <!-- Notification Drawer -->
-<div class="offcanvas offcanvas-end admin-notif-offcanvas" tabindex="-1" id="adminNotifDrawer" aria-labelledby="adminNotifDrawerLabel">
+<div class="offcanvas offcanvas-end admin-notif-offcanvas" tabindex="-1" id="adminNotifDrawer" aria-labelledby="adminNotifDrawerLabel" data-bs-backdrop="false" data-bs-scroll="true">
     <div class="offcanvas-header border-bottom">
         <div class="d-flex align-items-center gap-2">
             <div class="notif-header-icon">
@@ -250,7 +316,7 @@ if (isset($conn) && $conn instanceof mysqli) {
                     <i class="bi bi-check2-all"></i> Mark All as Read
                 </button>
             <?php endif; ?>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            <button type="button" class="btn-close notif-drawer-close" data-bs-dismiss="offcanvas" aria-label="Close notifications" title="Close notifications"></button>
         </div>
     </div>
 
@@ -319,6 +385,80 @@ if (isset($conn) && $conn instanceof mysqli) {
         <small class="notif-footer-text"><?= ($_SESSION['role'] ?? '') === 'admin' ? 'Recent resident activity and admin actions appear here automatically.' : 'Updates from your community appear here automatically.' ?></small>
     </div>
 </div>
+
+<style>
+    #adminNotifDrawer.admin-notif-offcanvas {
+        width: min(440px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+    }
+    #adminNotifDrawer .notif-drawer-close {
+        flex: 0 0 auto;
+        width: 1.1rem;
+        height: 1.1rem;
+        padding: .65rem;
+        opacity: .8;
+    }
+    #adminNotifDrawer .notif-drawer-close:hover,
+    #adminNotifDrawer .notif-drawer-close:focus-visible {
+        opacity: 1;
+    }
+    @media (max-width: 575.98px) {
+        #adminNotifDrawer.admin-notif-offcanvas {
+            width: min(340px, calc(100vw - 24px)) !important;
+            max-width: calc(100vw - 24px) !important;
+        }
+    }
+
+    /* Resident bottom navbar: a bit bigger, labels never split mid-word */
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident {
+        min-height: 66px !important;
+        padding: 6px 6px calc(6px + env(safe-area-inset-bottom)) !important;
+        gap: 2px !important;
+    }
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident > a {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        min-height: 54px !important;
+        padding: 5px 2px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        text-align: center !important;
+        line-height: 1.1 !important;
+    }
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident > a > i {
+        font-size: 22px !important;
+        line-height: 1 !important;
+    }
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident > a > span {
+        font-size: 11px !important;
+        letter-spacing: -.1px !important;
+        max-width: 100% !important;
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+        overflow-wrap: normal !important;
+        hyphens: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident > a > span.mbn-label-sm {
+        font-size: 9.5px !important;
+        letter-spacing: -.2px !important;
+    }
+    nav.mobile-bottom-nav.mobile-bottom-nav-resident > a > span.mbn-label-2line {
+        font-size: 9.5px !important;
+        letter-spacing: -.2px !important;
+        line-height: 1.05 !important;
+    }
+    /* Keep page content clear of the navbar */
+    @media (max-width: 991.98px) {
+        body:has(.mobile-bottom-nav-resident) .main-content {
+            padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+        }
+    }
+</style>
 
 <script>
 (function () {
@@ -492,7 +632,7 @@ if (isset($conn) && $conn instanceof mysqli) {
 
     document.addEventListener('visibilitychange', function () { if (!document.hidden) poll(); });
     poll();
-    window.setInterval(poll, 5000);
+    window.setInterval(poll, 30000); // every 30s: keeps InfinityFree under its connection limits
 })();
 </script>
 <?php endif; ?>

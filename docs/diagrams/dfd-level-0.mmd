@@ -1,0 +1,54 @@
+%%{init: {"theme":"neutral","flowchart":{"curve":"basis","nodeSpacing":12,"rankSpacing":45}}}%%
+%% Manuela 4B MIS - Level 0 Data Flow Diagram (Context Diagram)
+%% Gane-Sarson style: square = external entity, rounded = process.
+%% Text on an arrow is the data flow label.
+flowchart LR
+    RES["<b>Resident</b>"]
+    ADM["<b>Admin</b>"]
+    SYS("<b>0</b><br/><b>Manuela 4B Subdivision<br/>Management Information System</b>")
+    PMG["<b>PayMongo<br/>Payment Gateway</b>"]
+    EML["<b>Email Service<br/>(SMTP)</b>"]
+    GOO["<b>Google OAuth</b>"]
+
+    RES --- F1["Registration details and<br/>ID images"] --> SYS
+    RES --- F2["Login credentials and<br/>password requests"] --> SYS
+    RES --- F3["Profile, photo, and<br/>household updates"] --> SYS
+    RES --- F4["Reservation details"] --> SYS
+    RES --- F5["Payment requests, OTP<br/>codes, and receipt<br/>actions"] --> SYS
+    RES --- F6["Feedback and incident<br/>reports"] --> SYS
+    SYS --- F7["Application status and<br/>login results"] --> RES
+    SYS --- F8["Profile update results"] --> RES
+    SYS --- F9["Availability and<br/>reservation status"] --> RES
+    SYS --- F10["Balance, payment history,<br/>and receipts"] --> RES
+    SYS --- F11["Feedback status and<br/>replies"] --> RES
+    SYS --- F12["Resident Dashboard<br/>information,<br/>announcements, and<br/>notifications"] --> RES
+
+    ADM --- F13["Admin login credentials<br/>and password changes"] --> SYS
+    ADM --- F14["Verification decisions<br/>and homeowner records"] --> SYS
+    ADM --- F15["Reservation decisions"] --> SYS
+    ADM --- F16["Dues changes, manual<br/>payments, reminder<br/>requests, and receipt<br/>actions"] --> SYS
+    ADM --- F17["Feedback status updates<br/>and replies"] --> SYS
+    ADM --- F18["Announcement details"] --> SYS
+    ADM --- F19["Analytics filters"] --> SYS
+    SYS --- F20["Admin login results"] --> ADM
+    SYS --- F21["Pending applications, ID<br/>images, and homeowner<br/>information"] --> ADM
+    SYS --- F22["Reservation information"] --> ADM
+    SYS --- F23["Payment records,<br/>receipts, and CSV exports"] --> ADM
+    SYS --- F24["Feedback and incident<br/>details"] --> ADM
+    SYS --- F25["Announcement listings"] --> ADM
+    SYS --- F26["Admin Dashboard KPIs,<br/>notifications, and<br/>analytics"] --> ADM
+
+    SYS --- F27["Checkout session requests<br/>and status queries"] --> PMG
+    PMG --- F28["Checkout details, payment<br/>status, and webhook<br/>events"] --> SYS
+    SYS --- F29["Password reset OTP emails"] --> EML
+    SYS --- F30["Payment OTP and reminder<br/>emails"] --> EML
+    EML --- F31["Email send status"] --> SYS
+    SYS --- F32["Authorization and token<br/>requests"] --> GOO
+    GOO --- F33["Verified Google profile"] --> SYS
+
+    classDef entity fill:#ffffff,stroke:#222222,stroke-width:2px,color:#111111
+    classDef process fill:#E3F2EE,stroke:#0F6B5A,stroke-width:3px,color:#111111
+    class RES,ADM,PMG,EML,GOO entity
+    class SYS process
+    classDef flow fill:#ffffff,stroke:none,color:#111111
+    class F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14,F15,F16,F17,F18,F19,F20,F21,F22,F23,F24,F25,F26,F27,F28,F29,F30,F31,F32,F33 flow

@@ -2,9 +2,10 @@
 require_once '../config/init.php';
 require_once '../config/db.php';
 require_once '../includes/homeowner_helpers.php';
+require_once '../includes/auth_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -31,14 +32,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (!empty($block) && !empty($lot) && !empty($full_name)) {
         try {
-            $statusLookup = $conn->prepare('SELECT status FROM homeowners WHERE id = ?');
+            $statusLookup = $conn->prepare('SELECT status, email, user_id FROM homeowners WHERE id = ?');
             $statusLookup->bind_param('i', $id);
             $statusLookup->execute();
-            $currentStatus = strtolower((string) ($statusLookup->get_result()->fetch_assoc()['status'] ?? ''));
+            $currentRecord = $statusLookup->get_result()->fetch_assoc() ?: [];
+            $currentStatus = strtolower((string) ($currentRecord['status'] ?? ''));
             $statusLookup->close();
 
             if ($currentStatus === 'pending' && $status === 'active') {
                 $error = 'Pending resident applications must be approved from the Pending Residents page.';
+            } elseif ($email !== '' && normalize_email($email) !== normalize_email($currentRecord['email'] ?? '')
+                && email_in_use($conn, $email, (int) ($currentRecord['user_id'] ?? 0), $id)) {
+                $error = 'This email is already used by another account. Please use a different email.';
+            } elseif (homeowner_duplicate_exists($conn, $full_name, $block, $lot, $id)) {
+                $error = 'A homeowner with this name and address already exists.';
             } else {
                 $stmt = $conn->prepare("UPDATE homeowners SET block=?, lot=?, full_name=?, address=?, contact=?, email=?, monthly_due=?, dues_start_date=CASE WHEN ?='active' AND status <> 'active' THEN ? ELSE dues_start_date END, status=? WHERE id=?");
             }
@@ -47,6 +54,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt->bind_param("ssssssdsssi", $block, $lot, $full_name, $address, $contact, $email, $monthly_due, $status, $duesStartDate, $status, $id);
                 $stmt->execute();
                 $stmt->close();
+
+                // Pages like Reservations read the name from the login account, so keep both the same.
+                $linkedUserId = (int) ($currentRecord['user_id'] ?? 0);
+                if ($linkedUserId > 0) {
+                    $nameStmt = $conn->prepare('UPDATE users SET full_name = ? WHERE id = ?');
+                    $nameStmt->bind_param('si', $full_name, $linkedUserId);
+                    $nameStmt->execute();
+                    $nameStmt->close();
+                }
 
                 log_activity($conn, $id, 'Updated profile details', homeowner_address_label($block, $lot) . ", Status: {$status}");
 

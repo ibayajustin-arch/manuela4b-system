@@ -1,6 +1,7 @@
 <?php
 require_once 'config/init.php';
 require_once 'config/db.php';
+require_once 'includes/auth_helpers.php';
 
 $error = "";
 $success = "";
@@ -87,6 +88,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($error === '' && array_sum(array_column($validatedIdFiles, 'size')) > 8 * 1024 * 1024) {
                 $error = 'The front and back photos must be 8 MB or smaller combined. Please choose smaller images.';
             }
+        }
+
+        if ($error === '' && email_in_use($conn, $email)) {
+            $error = "This email is already used by another account. Please use a different email.";
         }
 
         if ($error === '') {
@@ -178,11 +183,11 @@ $csrf_token = generateCsrfToken();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="Assets/css/global.css?v=20" rel="stylesheet">
-    <link href="Assets/css/components.css?v=20" rel="stylesheet">
-    <link href="Assets/css/resident.css?v=20" rel="stylesheet">
-    <link href="Assets/css/admin.css?v=25" rel="stylesheet">
-    <link href="Assets/css/reference-theme.css?v=22" rel="stylesheet">
+    <link href="Assets/css/global.css?v=22" rel="stylesheet">
+    <link href="Assets/css/components.css?v=21" rel="stylesheet">
+    <link href="Assets/css/admin.css?v=27" rel="stylesheet">
+    <link href="Assets/css/resident.css?v=23" rel="stylesheet">
+    <link href="Assets/css/reference-theme.css?v=50" rel="stylesheet">
     <style>
         .register-page .register-form-grid {
             display: grid;
@@ -266,10 +271,10 @@ $csrf_token = generateCsrfToken();
             gap: 0.65rem;
             min-height: 46px;
             padding: 0.65rem 0.95rem;
-            border: 1px solid rgba(129, 140, 248, 0.48);
+            border: 1px solid #9CCFC2;
             border-radius: 0.65rem;
-            background: rgba(129, 140, 248, 0.1);
-            color: #E2E8F0;
+            background: #F3F7F6;
+            color: #1F2E2A;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
@@ -277,20 +282,20 @@ $csrf_token = generateCsrfToken();
         }
 
         .register-page .id-photo-picker button:hover {
-            border-color: #A5B4FC;
-            background: rgba(129, 140, 248, 0.2);
+            border-color: #0F6B5A;
+            background: #E1F1EC;
         }
 
         .register-page .id-photo-picker button:focus-visible,
         .register-page .id-photo-picker input[type="file"]:focus-visible + button {
-            outline: 2px solid #818CF8;
+            outline: 2px solid #0F6B5A;
             outline-offset: 2px;
         }
 
         .register-page .id-photo-help {
             display: block;
             margin-top: 0.4rem;
-            color: #C7D2FE !important;
+            color: #4A5C57 !important;
             font-size: 0.82rem;
             line-height: 1.55;
         }
@@ -299,7 +304,7 @@ $csrf_token = generateCsrfToken();
             display: block;
             min-height: 1.25rem;
             margin-top: 0.35rem;
-            color: #CBD5E1;
+            color: #4A5C57;
             font-size: 0.8rem;
             overflow-wrap: anywhere;
         }
@@ -315,6 +320,8 @@ $csrf_token = generateCsrfToken();
             }
         }
     </style>
+    <link href="Assets/css/responsive-fix.css?v=2" rel="stylesheet">
+    <link href="Assets/css/fluid-layout.css?v=1" rel="stylesheet">
 </head>
 <body class="register-page">
     <div class="login-shell">

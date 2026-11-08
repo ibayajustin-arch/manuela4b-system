@@ -1,0 +1,269 @@
+/* ========================================================
+   MOTION LAYER  (Assets/css/motion.css)
+   Smooth hover, press, page and menu transitions for the whole system.
+   Load LAST (after admin-compact.css).
+   All movement is switched off when the device has "Reduce motion" on.
+   ======================================================== */
+
+:root {
+  --m-ease: cubic-bezier(.22, 1, .36, 1);
+  --m-fast: .1s;
+  --m-base: .14s;
+  --m-slow: .2s;
+  /* Same speed for the older timing tokens from global.css */
+  --transition-fast: .1s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: .14s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: .2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- Always on (responsiveness, no movement) ---------- */
+html { -webkit-tap-highlight-color: transparent; }
+a, button, .btn, [role="button"], label, select, summary { touch-action: manipulation; }
+
+/* Top loading bar (created by Assets/js/smooth-nav.js) */
+.nav-progress {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 2100;
+  height: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+.nav-progress::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, #0F6B5A, #34D399);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.nav-progress.is-loading { opacity: 1; }
+.nav-progress.is-loading::before { animation: m4b-progress 5s cubic-bezier(.1, .7, .3, 1) forwards; }
+
+/* Phones: blurred see-through bars are expensive to redraw while scrolling */
+@media (max-width: 991.98px) {
+  html body .mobile-topbar,
+  html body .mobile-bottom-nav {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #FFFFFF !important;
+  }
+  html body .sidebar { will-change: transform; }
+}
+
+/* Sidebar submenu stays rendered so it can slide open and closed */
+html body .sidebar .nav-group > .nav-sub {
+  display: block !important;
+  max-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+}
+html body .sidebar .nav-group.open > .nav-sub {
+  max-height: 480px;
+  margin-top: 2px;
+  margin-bottom: 8px;
+  opacity: 1;
+  visibility: visible;
+}
+@media (min-width: 992px) {
+  html.sb-collapsed body .sidebar .nav-group > .nav-sub { display: none !important; }
+}
+
+/* ---------- Motion (only when the user has not asked for reduced motion) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* Page change: soft cross-fade (Chrome, Edge, Safari 18+) */
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: .12s;
+    animation-timing-function: var(--m-ease);
+  }
+
+  /* Navigation stays still while only the page content fades */
+  @media (min-width: 992px) {
+    html body .sidebar { view-transition-name: m4b-sidebar; }
+  }
+  @media (max-width: 991.98px) {
+    html body .mobile-topbar { view-transition-name: m4b-topbar; }
+    html body .mobile-bottom-nav { view-transition-name: m4b-bottom-nav; }
+  }
+  ::view-transition-group(m4b-sidebar),
+  ::view-transition-group(m4b-topbar),
+  ::view-transition-group(m4b-bottom-nav),
+  ::view-transition-new(m4b-sidebar),
+  ::view-transition-new(m4b-topbar),
+  ::view-transition-new(m4b-bottom-nav) { animation: none; }
+  ::view-transition-old(m4b-sidebar),
+  ::view-transition-old(m4b-topbar),
+  ::view-transition-old(m4b-bottom-nav) { display: none; }
+
+  /* Browsers without page cross-fades get a short fade-in instead */
+  @supports not (view-transition-class: a) {
+    .main-content { animation: m4b-fade-in .14s var(--m-ease) both; }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  /* ---- Sidebar ---- */
+  html body .sidebar .nav-group > .nav-sub {
+    transition:
+      max-height var(--m-slow) var(--m-ease),
+      opacity var(--m-base) ease,
+      margin var(--m-base) ease,
+      visibility 0s linear var(--m-slow);
+  }
+  html body .sidebar .nav-group.open > .nav-sub {
+    transition:
+      max-height var(--m-slow) var(--m-ease),
+      opacity var(--m-base) ease,
+      margin var(--m-base) ease,
+      visibility 0s linear 0s;
+  }
+
+  html body .sidebar .nav-link,
+  html body .sidebar .nav-sublink,
+  html body .sidebar .sidebar-logout-btn,
+  html body .sidebar .sidebar-toggle,
+  html body .sidebar .nav-group-toggle {
+    transition:
+      background-color var(--m-base) var(--m-ease),
+      color var(--m-base) var(--m-ease),
+      border-color var(--m-base) var(--m-ease),
+      box-shadow var(--m-base) var(--m-ease),
+      transform var(--m-fast) ease !important;
+  }
+  html body .sidebar .nav-link i,
+  html body .sidebar .nav-sublink i,
+  html body .sidebar .sidebar-logout-btn i {
+    transition: transform var(--m-base) var(--m-ease), color var(--m-base) var(--m-ease) !important;
+  }
+
+  /* Accent bar that grows on hover */
+  html body .sidebar .nav-link:not(.active)::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    bottom: 10px;
+    left: 2px;
+    width: 3px;
+    border-radius: 3px;
+    background: #A9D0C4;
+    transform: scaleY(0);
+    transition: transform var(--m-base) var(--m-ease);
+  }
+
+  @media (hover: hover) {
+    html body .sidebar .nav-link:not(.active):hover::before { transform: scaleY(1); }
+    html body .sidebar .nav-link:not(.active):hover i,
+    html body .sidebar .nav-sublink:not(.active):hover i,
+    html body .sidebar .sidebar-logout-btn:hover i { transform: translateX(3px) !important; }
+  }
+  html body .sidebar :is(.nav-link, .nav-sublink, .sidebar-logout-btn):active { transform: scale(.98) !important; }
+
+  /* Drawer on phones and tablets */
+  @media (max-width: 991.98px) {
+    html body .sidebar { transition: transform var(--m-slow) var(--m-ease) !important; }
+  }
+
+  /* ---- Bottom bar and top bar (phones) ---- */
+  html body .mobile-bottom-nav a {
+    transition:
+      background-color var(--m-base) var(--m-ease),
+      color var(--m-base) var(--m-ease),
+      border-color var(--m-base) var(--m-ease),
+      transform var(--m-fast) ease;
+  }
+  html body .mobile-bottom-nav a i { transition: transform var(--m-base) var(--m-ease); }
+  html body .mobile-bottom-nav a:active { transform: scale(.94); }
+  html body .mobile-bottom-nav a.active i { transform: translateY(-1px) scale(1.08); }
+  html body .mobile-topbar :is(.sidebar-open-btn, .btn-topbar-bell) { transition: background-color var(--m-fast) ease, transform var(--m-fast) ease !important; }
+  html body .mobile-topbar :is(.sidebar-open-btn, .btn-topbar-bell):active { transform: scale(.94) !important; }
+
+  /* ---- Buttons ---- */
+  html body .btn {
+    transition:
+      background-color var(--m-fast) ease,
+      border-color var(--m-fast) ease,
+      color var(--m-fast) ease,
+      box-shadow var(--m-base) var(--m-ease),
+      transform .08s ease !important;
+  }
+  html body :is(.main-content, .modal, .offcanvas) .btn:active:not(:disabled):not(.disabled) {
+    transform: scale(.97) !important;
+  }
+
+  /* ---- Form fields ---- */
+  html body :is(.form-control, .form-select, .cir-search, .form-check-input) {
+    transition:
+      border-color var(--m-fast) ease,
+      box-shadow var(--m-base) var(--m-ease),
+      background-color var(--m-fast) ease !important;
+  }
+
+  /* ---- Cards and quick actions ---- */
+  html body .main-content .card,
+  html body .main-content .dashboard-quick-action {
+    transition:
+      border-color var(--m-base) var(--m-ease),
+      box-shadow var(--m-base) var(--m-ease),
+      transform var(--m-base) var(--m-ease) !important;
+  }
+  @media (hover: hover) {
+    html body .main-content :is(a > .card, a.card, .card.hover-lift):hover,
+    html body .main-content .dashboard-quick-action:hover {
+      border-color: var(--primary-color) !important;
+      box-shadow: 0 6px 18px rgba(15, 60, 50, .10) !important;
+      transform: translateY(-2px) !important;
+    }
+  }
+
+  /* ---- Tables and lists ---- */
+  html body .main-content .table tbody tr,
+  html body .main-content .compact-row,
+  html body .main-content .tx-row,
+  html body .admin-notif-offcanvas .notif-card-item {
+    transition: background-color var(--m-fast) ease, border-color var(--m-fast) ease;
+  }
+
+  /* ---- Modals and drawers ---- */
+  .modal.fade .modal-dialog {
+    transform: translateY(14px) scale(.98);
+    transition: transform var(--m-slow) var(--m-ease);
+  }
+  .modal.show .modal-dialog { transform: none; }
+  .modal.modal-static .modal-dialog { transform: scale(1.02); }
+  .offcanvas { --bs-offcanvas-transition: transform var(--m-slow) var(--m-ease); }
+
+  /* ---- Alerts slide in gently ---- */
+  html body .main-content .alert { animation: m4b-slide-down .16s var(--m-ease) both; }
+}
+
+/* ---------- Print: nothing animated ---------- */
+@media print {
+  .main-content { animation: none !important; }
+  .nav-progress { display: none !important; }
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes m4b-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes m4b-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes m4b-progress {
+  0%   { transform: scaleX(0); }
+  20%  { transform: scaleX(.45); }
+  60%  { transform: scaleX(.8); }
+  100% { transform: scaleX(.95); }
+}

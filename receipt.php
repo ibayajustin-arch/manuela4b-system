@@ -257,18 +257,27 @@ $baseQuery = 'type=' . $type . '&id=' . $recordId;
     body.embed .sheet { max-width: none; margin: 0; padding: 10px; box-shadow: none; border-radius: 8px; }
 
     @media screen and (max-width: 575.98px) {
-        body.embed .sheet { padding: 6px; }
-        body.embed .receipt { padding: 5mm; }
-        body.embed .head { align-items: flex-start; gap: 8px; }
-        body.embed .org { font-size: 14px; }
-        body.embed .doc-title { font-size: 8px; }
-        body.embed .rno { max-width: 48%; }
-        body.embed .rno .val { font-size: 11px; overflow-wrap: anywhere; }
-        body.embed .grid { grid-template-columns: 1fr; gap: 7px; }
-        body.embed .field.full { grid-column: auto; }
-        body.embed .sign-row { flex-wrap: wrap; gap: 18px; }
-        body.embed .sign { width: 100%; }
-        body.embed .amount-row .amt { font-size: 18px; }
+        body.embed .sheet { padding: 4px; }
+        body.embed .receipt { padding: 4mm; }
+        body.embed .head { align-items: flex-start; gap: 6px; padding-bottom: 6px; margin-bottom: 7px; }
+        body.embed .org { font-size: 13px; }
+        body.embed .doc-title { font-size: 7px; }
+        body.embed .rno { max-width: 45%; }
+        body.embed .rno .lbl { font-size: 7px; }
+        body.embed .rno .val { font-size: 10px; overflow-wrap: anywhere; }
+        body.embed .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 8px; margin-bottom: 7px; }
+        body.embed .field.full { grid-column: 1 / -1; }
+        body.embed .field .lbl { font-size: 7px; }
+        body.embed .field .val { font-size: 10px; overflow-wrap: anywhere; }
+        body.embed .amount-box { padding: 7px 9px; margin-bottom: 6px; }
+        body.embed .sum-row { font-size: 9px; }
+        body.embed .amount-row .lbl { font-size: 8px; }
+        body.embed .amount-row .amt { font-size: 16px; }
+        body.embed .words { font-size: 9px; }
+        body.embed .balance { font-size: 9px; }
+        body.embed .sign-row { align-items: flex-end; gap: 8px; margin-top: 10px; }
+        body.embed .note { font-size: 8px; }
+        body.embed .sign { width: 45%; font-size: 8px; }
     }
 
     @media print {

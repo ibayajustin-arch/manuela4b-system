@@ -169,6 +169,27 @@ if (!function_exists('homeowner_account_summary')) {
     }
 }
 
+if (!function_exists('homeowner_duplicate_exists')) {
+    // True when another active record already has the same name and house address.
+    function homeowner_duplicate_exists($conn, string $fullName, string $block, string $lot, int $exceptId = 0): bool {
+        try {
+            $stmt = $conn->prepare('SELECT id FROM homeowners
+                                    WHERE LOWER(TRIM(full_name)) = LOWER(TRIM(?))
+                                      AND LOWER(TRIM(block)) = LOWER(TRIM(?))
+                                      AND LOWER(TRIM(lot)) = LOWER(TRIM(?))
+                                      AND id <> ? AND archived_at IS NULL LIMIT 1');
+            $stmt->bind_param('sssi', $fullName, $block, $lot, $exceptId);
+            $stmt->execute();
+            $found = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            return (bool) $found;
+        } catch (Throwable $e) {
+            error_log('Homeowner duplicate check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+}
+
 if (!function_exists('log_activity')) {
     function log_activity($conn, $homeowner_id, $action, $details = null) {
         try {

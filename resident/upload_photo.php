@@ -61,30 +61,57 @@ if (!is_dir($upload_dir)) {
     mkdir($upload_dir, 0755, true);
 }
 
-// Remove any previous photo for this user (possibly a different extension)
-foreach (glob($upload_dir . "user_{$user_id}.*") as $old_file) {
-    @unlink($old_file);
-}
-
 $filename = "user_{$user_id}.{$ext}";
 $destination = $upload_dir . $filename;
+$stored_path = "Assets/uploads/avatars/{$filename}";
+$temporary_destination = $destination . '.uploading';
+$backup_destination = $destination . '.previous';
 
-if (!move_uploaded_file($file['tmp_name'], $destination)) {
+if (!move_uploaded_file($file['tmp_name'], $temporary_destination)) {
     $_SESSION['flash_error'] = "Could not save the photo. Please try again.";
     header("Location: profile.php");
     exit;
 }
 
-// Store the relative path (from the app root) so it can be reused in <img src>
-$stored_path = "Assets/uploads/avatars/{$filename}";
-
 try {
-    $stmt = $conn->prepare("UPDATE users SET profile_photo = ? WHERE id = ?");
-    $stmt->bind_param("si", $stored_path, $user_id);
-    $stmt->execute();
+    $stmt = $conn->prepare("SELECT profile_photo FROM users WHERE id = ?");
+    if (!$stmt) throw new RuntimeException($conn->error);
+    $stmt->bind_param("i", $user_id);
+    if (!$stmt->execute()) throw new RuntimeException($stmt->error);
+    $old_record = $stmt->get_result()->fetch_assoc();
+    $old_path = $old_record['profile_photo'] ?? null;
     $stmt->close();
+
+    $had_destination = is_file($destination);
+    if ($had_destination && !rename($destination, $backup_destination)) {
+        throw new RuntimeException('Unable to preserve the current profile photo.');
+    }
+    if (!rename($temporary_destination, $destination)) {
+        if ($had_destination) @rename($backup_destination, $destination);
+        throw new RuntimeException('Unable to replace the saved profile photo.');
+    }
+
+    $stmt = $conn->prepare("UPDATE users SET profile_photo = ? WHERE id = ?");
+    if (!$stmt) throw new RuntimeException($conn->error);
+    $stmt->bind_param("si", $stored_path, $user_id);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        @unlink($destination);
+        if ($had_destination) @rename($backup_destination, $destination);
+        throw new RuntimeException('Unable to update the profile photo record.');
+    }
+    $stmt->close();
+
+    if (!empty($old_path)) {
+        $old_file = '../' . $old_path;
+        if (is_file($old_file) && realpath($old_file) !== realpath($destination)) @unlink($old_file);
+    }
+    if ($had_destination) @unlink($backup_destination);
+    foreach (glob($upload_dir . "user_{$user_id}.*.previous") as $stale_backup) @unlink($stale_backup);
     $_SESSION['flash_success'] = "Profile photo updated.";
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    @unlink($temporary_destination);
+    error_log('Profile photo update failed for user ' . $user_id . ': ' . $e->getMessage());
     $_SESSION['flash_error'] = "Database error while saving your photo.";
 }
 

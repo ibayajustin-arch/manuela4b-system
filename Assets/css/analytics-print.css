@@ -5,25 +5,43 @@
    so these rules override anything in admin.css / global.css /
    reference-theme.css / components.css that could blank the printout
    (visibility:hidden, opacity:0 reveal animations, fixed/100vh layouts).
+
+   The on-screen dark theme is NOT touched. Everything here only applies
+   when printing / saving as PDF.
    ========================================================================== */
 
 @page {
-    size: A4 portrait;
-    margin: 12mm;
+  size: A4 portrait;
+  margin: 12mm 12mm 14mm;
+
+  /* Page numbers (supported by current Chrome / Edge; ignored elsewhere) */
+  @bottom-left {
+    content: "Manuela 4B HOA · Analytics report";
+    font-family: Poppins, Arial, sans-serif;
+    font-size: 8pt;
+    color: #64748b;
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: Poppins, Arial, sans-serif;
+    font-size: 8pt;
+    color: #64748b;
+  }
 }
 
 html,
 body {
-    width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-    color: #0f172a !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 10pt;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 /* ---------- Hide app chrome ---------- */
@@ -44,284 +62,755 @@ html body .analytics-page .an-actions,
 html body .analytics-page .an-filters,
 html body .analytics-page .an-toggle,
 html body .analytics-page .an-error,
-html body .analytics-page .an-updated {
-    display: none !important;
+html body .analytics-page .an-updated,
+html body .analytics-page .an-heat-tip {
+  display: none !important;
 }
 
 /* ---------- Make the layout flow normally ---------- */
 html body .app-wrapper {
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-    transform: none !important;
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: #ffffff !important;
+  transform: none !important;
 }
 
 html body .app-wrapper .main-content,
 html body .analytics-page {
-    display: block !important;
-    position: static !important;
-    inset: auto !important;
-    float: none !important;
-    flex: none !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: visible !important;
-    background: #ffffff !important;
-    transform: none !important;
+  display: block !important;
+  position: static !important;
+  inset: auto !important;
+  float: none !important;
+  flex: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: #ffffff !important;
+  transform: none !important;
 }
 
 /* Force everything inside the report to be visible (fixes blank pages) */
 html body .analytics-page,
 html body .analytics-page * {
-    visibility: visible !important;
-    opacity: 1 !important;
-    animation: none !important;
-    transition: none !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: none !important;
+  transition: none !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 html body .analytics-page [hidden] {
-    display: none !important;
+  display: none !important;
 }
 
 html body #anApp {
-    display: block !important;
-    overflow: visible !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+/* ==========================================================================
+   PRINT PALETTE
+   The screen theme defines these tokens as light-on-dark (ink = white,
+   card = navy). Re-declaring them here flips every component that uses
+   them to dark-on-white, only for print.
+   ========================================================================== */
+html body .analytics-page {
+  --an-ink: #0f172a;
+  --an-ink-light: #1e293b;
+  --an-muted: #475569;
+  --an-subtle: #64748b;
+  --an-line: #cbd5e1;
+  --an-line-soft: #e2e8f0;
+  --an-soft: #f1f5f9;
+  --an-card: #ffffff;
+
+  --an-green: #047857;
+  --an-green-light: #047857;
+  --an-green-dark: #064e3b;
+  --an-green-soft: #ecfdf5;
+  --an-green-border: #a7f3d0;
+
+  --an-orange: #b45309;
+  --an-orange-light: #b45309;
+  --an-orange-soft: #fffbeb;
+  --an-orange-border: #fcd34d;
+
+  --an-blue: #4338ca;
+  --an-blue-light: #4338ca;
+
+  --an-red: #b91c1c;
+  --an-red-soft: #fef2f2;
+  --an-red-border: #fecaca;
+}
+
+html body .analytics-page a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+
+/* ---------- Print-only letterhead & signature ---------- */
+html body .analytics-page .an-print-brand {
+  display: flex !important;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 6px !important;
+  font-size: 8.5pt;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-print-brand strong {
+  font-size: 10.5pt;
+  letter-spacing: 0.04em;
+  color: #14532d !important;
+}
+
+html body .analytics-page .an-print-sign {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  margin: 30px 0 0 !important;
+  font-size: 8.5pt;
+  color: #475569 !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+html body .analytics-page .an-print-sign div {
+  padding-top: 5px;
+  border-top: 1px solid #0f172a;
+  text-align: center;
 }
 
 /* ---------- Report header ---------- */
 html body .analytics-page .an-hero {
-    display: block !important;
-    padding: 0 0 10px !important;
-    margin: 0 0 6px !important;
-    background: none !important;
-    box-shadow: none !important;
-    color: #000000 !important;
-    border: 0 !important;
-    border-bottom: 2px solid #15803d !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
+  display: block !important;
+  padding: 0 0 8px !important;
+  margin: 0 0 4px !important;
+  background: none !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  border: 0 !important;
+  border-bottom: 2px solid #15803d !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
 }
 
 html body .analytics-page .an-hero::before {
-    display: none !important;
+  display: none !important;
 }
 
 html body .analytics-page .an-hero h1 {
-    color: #000000 !important;
-    text-shadow: none !important;
-    font-size: 20pt !important;
-    margin: 0 0 4px !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-size: 18pt !important;
+  margin: 0 0 3px !important;
 }
 
 html body .analytics-page .an-eyebrow {
-    background: none !important;
-    border: 0 !important;
-    padding: 0 !important;
-    color: #15803d !important;
-    backdrop-filter: none !important;
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 0 4px !important;
+  color: #15803d !important;
+  font-size: 8pt !important;
+  backdrop-filter: none !important;
 }
 
 html body .analytics-page .an-eyebrow i {
-    color: #15803d !important;
+  color: #15803d !important;
 }
 
 html body .analytics-page .an-sub {
-    color: #334155 !important;
-    text-shadow: none !important;
-    font-size: 10pt !important;
+  color: #334155 !important;
+  text-shadow: none !important;
+  font-size: 9pt !important;
+  margin: 0 !important;
 }
 
 html body .analytics-page .an-print-meta {
-    display: block !important;
-    margin: 0 0 14px !important;
-    font-size: 9pt !important;
-    color: #334155 !important;
+  display: block !important;
+  margin: 0 0 10px !important;
+  font-size: 8.5pt !important;
+  color: #334155 !important;
 }
 
-/* ---------- KPI cards & insights ---------- */
+/* ---------- KPI cards ---------- */
 html body .analytics-page .an-kpis {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-    margin-bottom: 14px !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
 }
 
 html body .analytics-page .an-kpi {
-    min-height: 0 !important;
-    padding: 4px !important;
-    background: #e2e8f0 !important;
-    box-shadow: none !important;
-    border: 1px solid #cbd5e1 !important;
-    transform: none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  min-height: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  transform: none !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 html body .analytics-page .an-kpi .title-card {
-    min-height: 0 !important;
-    padding: 6px 8px !important;
+  min-height: 0 !important;
+  padding: 7px 10px 0 !important;
 }
 
 html body .analytics-page .an-kpi .l {
-    color: #0f172a !important;
-    text-shadow: none !important;
+  color: #166534 !important;
+  font-size: 7.5pt !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow: none !important;
 }
 
 html body .analytics-page .an-kpi .card-content {
-    padding: 8px !important;
-    background: #ffffff !important;
-    color: #334155 !important;
+  padding: 2px 10px 8px !important;
+  gap: 2px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #334155 !important;
 }
 
 html body .analytics-page .an-kpi strong {
-    font-size: 16pt !important;
-    color: #0f172a !important;
+  font-size: 15pt !important;
+  color: #0f172a !important;
 }
 
 html body .analytics-page .an-kpi-sub,
 html body .analytics-page .an-kpi-sub small {
-    color: #475569 !important;
+  color: #475569 !important;
+  font-size: 7.5pt !important;
 }
 
+/* Trend pills ("No baseline", "▲ 12% vs previous period") */
+html body .analytics-page .an-delta {
+  font-size: 7pt !important;
+}
+
+html body .analytics-page .an-delta.up {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+html body .analytics-page .an-delta.down {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border-color: #fecaca !important;
+}
+
+html body .analytics-page .an-delta.flat {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* ---------- Insights ---------- */
 html body .analytics-page .an-insights {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 8px !important;
-    margin-bottom: 16px !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-bottom: 12px !important;
 }
 
 html body .analytics-page .an-insight {
-    padding: 10px 12px !important;
-    box-shadow: none !important;
-    background: #f8fafc !important;
-    border: 1px solid #cbd5e1 !important;
-    transform: none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  padding: 7px 10px !important;
+  gap: 8px !important;
+  font-size: 8.5pt;
+  box-shadow: none !important;
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border: 1px solid #cbd5e1 !important;
+  transform: none !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+html body .analytics-page .an-insight i {
+  color: #15803d !important;
+}
+
+/* An odd last insight stretches across both columns (no lonely half-row) */
+html body .analytics-page .an-insight:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 /* ---------- Sections, grid, cards ---------- */
 html body .analytics-page .an-section {
-    margin-bottom: 18px !important;
-    break-inside: auto;
-    page-break-inside: auto;
+  margin-bottom: 14px !important;
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+html body .analytics-page .an-section > header,
+html body .analytics-page .an-section-header {
+  margin-bottom: 8px !important;
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 html body .analytics-page .an-section h2 {
-    font-size: 14pt !important;
-    break-after: avoid;
-    page-break-after: avoid;
+  font-size: 12.5pt !important;
+  color: #0f172a !important;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+html body .analytics-page .an-section > header p,
+html body .analytics-page .an-section-title-wrap p {
+  margin: 2px 0 0 !important;
+  font-size: 8.5pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-section-badge {
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 8pt !important;
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
 }
 
 html body .analytics-page .an-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-    overflow: visible !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  overflow: visible !important;
 }
 
 html body .analytics-page .an-grid .an-card,
 html body .analytics-page .an-grid .an-card.w4,
 html body .analytics-page .an-grid .an-card.w6,
 html body .analytics-page .an-grid .an-card.w8 {
-    grid-column: span 1 !important;
-    min-width: 0 !important;
+  grid-column: span 1 !important;
+  min-width: 0 !important;
 }
 
 html body .analytics-page .an-grid .an-card.w12 {
-    grid-column: 1 / -1 !important;
+  grid-column: 1 / -1 !important;
 }
 
 html body .analytics-page .an-card {
-    padding: 14px !important;
-    box-shadow: none !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #ffffff !important;
-    transform: none !important;
-    break-inside: avoid;
-    page-break-inside: avoid;
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  transform: none !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+html body .analytics-page .an-head {
+  margin-bottom: 8px !important;
+  padding-bottom: 6px !important;
+}
+
+html body .analytics-page .an-card h3 {
+  font-size: 10pt !important;
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-head p,
+html body .analytics-page .an-card > p {
+  font-size: 7.5pt !important;
+  color: #475569 !important;
 }
 
 /* Long lists are allowed to continue onto the next page */
 html body .analytics-page .an-card:has(.an-leader),
 html body .analytics-page .an-card:has(.an-timeline),
 html body .analytics-page .an-card:has(.an-table) {
-    break-inside: auto;
-    page-break-inside: auto;
+  break-inside: auto;
+  page-break-inside: auto;
 }
 
 html body .analytics-page .an-leader li,
 html body .analytics-page .an-timeline li,
 html body .analytics-page .an-table tr {
-    break-inside: avoid;
-    page-break-inside: avoid;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
-/* ---------- Charts (canvas replaced by a hi-res image by the JS) ---------- */
-html body .analytics-page .an-chart,
+/* ---------- Charts (canvas replaced by a print-colored image by the JS) ---------- */
+html body .analytics-page .an-chart {
+  height: 210px !important;
+  min-height: 210px !important;
+  flex: none !important;
+}
+
 html body .analytics-page .an-chart.tall {
-    height: 250px !important;
-    min-height: 250px !important;
-    flex: none !important;
+  height: 230px !important;
+  min-height: 230px !important;
 }
 
 html body .analytics-page .an-chart.short {
-    height: 210px !important;
-    min-height: 210px !important;
+  height: 190px !important;
+  min-height: 190px !important;
 }
 
 html body .analytics-page .an-chart canvas {
-    max-width: 100% !important;
+  max-width: 100% !important;
 }
 
 html body .analytics-page .an-chart.an-has-img canvas {
-    display: none !important;
+  display: none !important;
 }
 
 html body .analytics-page .an-print-img {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
 }
 
-/* ---------- Lists, heatmap, table ---------- */
+html body .analytics-page .an-empty {
+  color: #475569 !important;
+}
+
+/* ---------- Leaderboard ---------- */
 html body .analytics-page .an-timeline,
 html body .analytics-page .an-leader {
-    max-height: none !important;
-    overflow: visible !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+html body .analytics-page .an-leader {
+  gap: 5px !important;
+}
+
+html body .analytics-page .an-leader li {
+  grid-template-columns: 22px 30px 1fr auto !important;
+  gap: 8px !important;
+  padding: 6px 8px !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  transform: none !important;
+  box-shadow: none !important;
+  font-size: 8.5pt;
+}
+
+html body .analytics-page .an-leader li small {
+  color: #475569 !important;
+  font-size: 7pt !important;
+}
+
+html body .analytics-page .an-rank {
+  width: 22px !important;
+  height: 22px !important;
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html body .analytics-page .an-av {
+  width: 30px !important;
+  height: 30px !important;
+  background: #fee2e2 !important;
+  border-color: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+html body .analytics-page .an-pill {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border-color: #fecaca !important;
+  font-size: 7pt !important;
+}
+
+html body .analytics-page .an-pill.warn {
+  background: #fffbeb !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+html body .analytics-page .an-bar {
+  background: #e2e8f0 !important;
+}
+
+/* ---------- Timeline ---------- */
+html body .analytics-page .an-timeline li {
+  font-size: 8.5pt;
+  padding-bottom: 8px !important;
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-timeline li small {
+  display: block;
+  color: #475569 !important;
+  font-size: 7pt !important;
+}
+
+html body .analytics-page .an-timeline li::before {
+  border-color: #ffffff !important;
+}
+
+/* ---------- Heatmap (12 month blocks → 4 per row, readable squares) ---------- */
+html body .analytics-page .an-heat-wrap {
+  gap: 10px !important;
+}
+
+html body .analytics-page .an-heat-summary {
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+  gap: 6px !important;
+}
+
+html body .analytics-page .an-heat-stat {
+  padding: 6px 8px !important;
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+html body .analytics-page .an-heat-stat b {
+  font-size: 9pt !important;
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-heat-stat small {
+  font-size: 7pt !important;
+  color: #475569 !important;
 }
 
 html body .analytics-page .an-heat {
-    grid-template-columns: repeat(13, minmax(0, 1fr)) !important;
-    gap: 4px !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+html body .analytics-page .an-heat-month {
+  padding: 6px 8px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+html body .analytics-page .an-heat-month.cur {
+  background: #fffbeb !important;
+  border-color: #fcd34d !important;
+}
+
+html body .analytics-page .an-heat-mlabel {
+  margin-bottom: 5px !important;
+  font-size: 7.5pt !important;
+  color: #1e293b !important;
+}
+
+html body .analytics-page .an-heat-mlabel em {
+  background: #b45309 !important;
+  color: #ffffff !important;
+}
+
+html body .analytics-page .an-heat-weeks {
+  gap: 3px !important;
 }
 
 html body .analytics-page .an-heat-cell {
-    aspect-ratio: auto !important;
-    min-height: 20px !important;
-    transform: none !important;
-    box-shadow: none !important;
+  width: 17px !important;
+  height: 17px !important;
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  border-radius: 4px !important;
+  transform: none !important;
 }
 
+html body .analytics-page .an-heat-cell:not(.now) {
+  box-shadow: none !important;
+}
+
+html body .analytics-page .an-heat-cell.now {
+  box-shadow:
+    0 0 0 1.5px #ffffff,
+    0 0 0 3px #b45309 !important;
+}
+
+html body .analytics-page .an-heat-cell.zero {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html body .analytics-page .an-heat-cell.future.zero {
+  background: transparent !important;
+  border: 1px dashed #94a3b8 !important;
+}
+
+html body .analytics-page .an-heat-cell.peak::after {
+  border-color: #ffffff !important;
+  background: #b45309 !important;
+}
+
+html body .analytics-page .an-heat-mtotal {
+  margin-top: 5px !important;
+  font-size: 7pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-heat-mtotal b {
+  font-size: 8pt !important;
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-heat-legend {
+  padding-top: 8px !important;
+  font-size: 7pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-heat-swatch.zero {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html body .analytics-page .an-heat-swatch.future {
+  background: transparent !important;
+  border: 1px dashed #94a3b8 !important;
+}
+
+html body .analytics-page .an-heat-swatch.now {
+  background: #f1f5f9 !important;
+  box-shadow:
+    0 0 0 2px #ffffff,
+    0 0 0 3px #b45309 !important;
+}
+
+html body .analytics-page .an-heat-dot {
+  background: #b45309 !important;
+}
+
+/* ---------- Forecast section ---------- */
+html body .analytics-page .an-fc-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin-bottom: 10px !important;
+}
+
+html body .analytics-page .an-fc-stat {
+  padding: 8px 10px !important;
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+html body .analytics-page .an-fc-stat.hl {
+  background: #fffbeb !important;
+  border-color: #fcd34d !important;
+}
+
+html body .analytics-page .an-fc-stat span {
+  font-size: 6.5pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-fc-stat b {
+  font-size: 12pt !important;
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-fc-stat.hl b {
+  color: #92400e !important;
+}
+
+html body .analytics-page .an-fc-stat small {
+  font-size: 7pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-fc-grade {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html body .analytics-page .an-fc-grade b {
+  color: #0f172a !important;
+}
+
+html body .analytics-page .an-fc-grade.good {
+  background: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+html body .analytics-page .an-fc-grade.good b {
+  color: #047857 !important;
+}
+
+html body .analytics-page .an-fc-grade.fair {
+  background: #fffbeb !important;
+  border-color: #fcd34d !important;
+}
+
+html body .analytics-page .an-fc-grade.fair b {
+  color: #92400e !important;
+}
+
+html body .analytics-page .an-fc-grade.weak {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+
+html body .analytics-page .an-fc-grade.weak b {
+  color: #b91c1c !important;
+}
+
+html body .analytics-page .an-fc-row {
+  font-size: 8pt !important;
+}
+
+html body .analytics-page .an-fc-note,
+html body .analytics-page .an-fc-method {
+  font-size: 7.5pt !important;
+  color: #475569 !important;
+}
+
+html body .analytics-page .an-fc-method {
+  background: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ---------- Tables ---------- */
 html body .analytics-page .table-responsive {
-    overflow: visible !important;
+  overflow: visible !important;
+}
+
+html body .analytics-page .an-table {
+  background: transparent !important;
 }
 
 html body .analytics-page .an-table th,
 html body .analytics-page .an-table td {
-    padding: 7px 10px !important;
-    font-size: 9pt !important;
+  padding: 5px 8px !important;
+  font-size: 8pt !important;
+}
+
+html body .analytics-page .an-table th {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+}
+
+html body .analytics-page .an-table td {
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+html body .analytics-page .an-table tr.an-fc-total td {
+  background: #f1f5f9 !important;
+  color: #92400e !important;
 }

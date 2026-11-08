@@ -6,7 +6,7 @@
    --------------------------------------------------------- */
 if (!function_exists('role_home')) {
     function role_home($role) {
-        return BASE_PATH . ($role === 'admin' ? '/admin/dashboard.php' : '/resident/profile.php');
+        return BASE_PATH . ($role === 'admin' ? '/admin/dashboard.php' : '/resident/dashboard.php');
     }
 }
 
@@ -187,6 +187,63 @@ if (!function_exists('find_users_by_phone')) {
             }
         }
         return $out;
+    }
+}
+
+/* ---------------------------------------------------------
+   One email per account
+   --------------------------------------------------------- */
+if (!function_exists('normalize_email')) {
+    // Same mailbox = same value. Gmail ignores dots and anything after a plus sign.
+    function normalize_email($raw) {
+        $email = strtolower(trim((string) $raw));
+        if (strpos($email, '@') === false) return $email;
+
+        [$local, $domain] = explode('@', $email, 2);
+        if ($domain === 'gmail.com' || $domain === 'googlemail.com') {
+            $local = str_replace('.', '', explode('+', $local, 2)[0]);
+            $domain = 'gmail.com';
+        }
+        return $local . '@' . $domain;
+    }
+}
+
+if (!function_exists('email_in_use')) {
+    // True when another account has this email on its profile or linked Google account.
+    // Also true when the check cannot finish, so a database problem never lets a duplicate through.
+    function email_in_use($conn, $email, $exceptUserId = 0, $exceptHomeownerId = 0) {
+        $target = normalize_email($email);
+        if ($target === '') return false;
+
+        $exceptUserId = (int) $exceptUserId;
+        $exceptHomeownerId = (int) $exceptHomeownerId;
+        try {
+            // Held until this request ends, so two people cannot claim one email at the same moment.
+            $lock = $conn->query("SELECT GET_LOCK('manuela4b_email_check', 5) AS got");
+            if (!$lock || (int) ($lock->fetch_assoc()['got'] ?? 0) !== 1) {
+                throw new RuntimeException('Could not get the email check lock.');
+            }
+
+            $stmt = $conn->prepare("SELECT email FROM homeowners WHERE email IS NOT NULL AND email <> '' AND id <> ? AND (user_id IS NULL OR user_id <> ?)");
+            $stmt->bind_param("ii", $exceptHomeownerId, $exceptUserId);
+            $stmt->execute();
+            $emails = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            $stmt = $conn->prepare("SELECT email FROM user_identities WHERE email IS NOT NULL AND email <> '' AND user_id <> ?");
+            $stmt->bind_param("i", $exceptUserId);
+            $stmt->execute();
+            $emails = array_merge($emails, $stmt->get_result()->fetch_all(MYSQLI_ASSOC));
+            $stmt->close();
+
+            foreach ($emails as $row) {
+                if (normalize_email($row['email']) === $target) return true;
+            }
+            return false;
+        } catch (Throwable $e) {
+            error_log('Email uniqueness check failed: ' . $e->getMessage());
+            return true;
+        }
     }
 }
 

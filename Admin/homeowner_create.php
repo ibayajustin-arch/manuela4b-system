@@ -2,9 +2,10 @@
 require_once '../config/init.php';
 require_once '../config/db.php';
 require_once '../includes/homeowner_helpers.php';
+require_once '../includes/auth_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { 
-    header("Location: ../login.php"); 
+    header("Location: login.php");
     exit; 
 }
 
@@ -26,6 +27,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $allowedStreets = ['Duhat', 'Santol', 'Mansanas', 'Granada', 'Guyabano', 'Atis', 'Ubas'];
         if (!in_array(strtolower($block), array_map('strtolower', $allowedStreets), true)) {
             $error = 'Please select one of the listed streets.';
+        } elseif ($email !== '' && email_in_use($conn, $email)) {
+            $error = 'This email is already used by another account. Please use a different email.';
+        } elseif (!empty($lot) && !empty($full_name) && homeowner_duplicate_exists($conn, $full_name, $block, $lot)) {
+            $error = 'A homeowner with this name and address already exists.';
         } elseif (!empty($lot) && !empty($full_name)) {
         try {
             $stmt = $conn->prepare("INSERT INTO homeowners (block, lot, full_name, address, contact, email, monthly_due, status, dues_start_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");

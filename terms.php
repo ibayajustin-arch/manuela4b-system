@@ -11,13 +11,15 @@ require_once 'config/init.php';
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="Assets/css/global.css?v=20" rel="stylesheet">
-    <link href="Assets/css/components.css?v=20" rel="stylesheet">
-    <link href="Assets/css/reference-theme.css?v=20" rel="stylesheet">
+    <link href="Assets/css/global.css?v=22" rel="stylesheet">
+    <link href="Assets/css/components.css?v=21" rel="stylesheet">
+    <link href="Assets/css/admin.css?v=27" rel="stylesheet">
+    <link href="Assets/css/resident.css?v=23" rel="stylesheet">
+    <link href="Assets/css/reference-theme.css?v=50" rel="stylesheet">
     <style>
         body {
-            background-color: var(--ref-bg, #0B1220);
-            color: var(--ref-text, #E2E8F0);
+            background-color: var(--bg-color, #E9F0EE);
+            color: var(--text-main, #1F2E2A);
             font-family: 'Poppins', sans-serif;
             min-height: 100vh;
             padding: 40px 16px;
@@ -27,14 +29,14 @@ require_once 'config/init.php';
             margin: 0 auto;
         }
         .terms-card {
-            background-color: var(--ref-card, #111A2E);
-            border: 1px solid var(--ref-border, rgba(255, 255, 255, 0.08));
+            background-color: var(--surface-color, #FFFFFF);
+            border: 1px solid var(--border-color, #8CC4B6);
             border-radius: 16px;
             padding: 40px 36px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            box-shadow: var(--card-shadow, 0 2px 8px rgba(15, 60, 50, 0.07));
         }
         .terms-header {
-            border-bottom: 1px solid var(--ref-border, rgba(255, 255, 255, 0.08));
+            border-bottom: 1px solid var(--border-color-soft, #CBE3DC);
             padding-bottom: 24px;
             margin-bottom: 28px;
         }
@@ -48,23 +50,25 @@ require_once 'config/init.php';
             width: 44px;
             height: 44px;
             border-radius: 10px;
-            background: rgba(129, 140, 248, 0.15);
+            background: var(--primary-soft, #E1F1EC);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            color: #818CF8;
+            color: var(--primary-color, #0F6B5A);
             font-size: 1.1rem;
         }
+        .terms-brand-name { color: var(--text-heading, #0F1F1B); }
+        .terms-brand-tag { color: var(--text-muted, #4A5C57); }
         .terms-title {
             font-size: 1.75rem;
             font-weight: 700;
-            color: #FFFFFF;
+            color: var(--text-heading, #0F1F1B);
             margin: 0 0 4px;
         }
         .terms-date {
             font-size: 0.85rem;
-            color: #94A3B8;
+            color: var(--text-muted, #4A5C57);
         }
         .terms-section {
             margin-bottom: 28px;
@@ -72,7 +76,7 @@ require_once 'config/init.php';
         .terms-section h3 {
             font-size: 1.1rem;
             font-weight: 600;
-            color: #818CF8;
+            color: var(--primary-color, #0F6B5A);
             margin-bottom: 10px;
             display: flex;
             align-items: center;
@@ -81,7 +85,7 @@ require_once 'config/init.php';
         .terms-section p, .terms-section li {
             font-size: 0.92rem;
             line-height: 1.7;
-            color: #CBD5E1;
+            color: var(--text-main, #1F2E2A);
             margin-bottom: 10px;
         }
         .terms-section ul {
@@ -90,16 +94,16 @@ require_once 'config/init.php';
         }
         .terms-badge {
             display: inline-block;
-            background: rgba(129, 140, 248, 0.12);
-            color: #818CF8;
-            border: 1px solid rgba(129, 140, 248, 0.25);
+            background: var(--primary-soft, #E1F1EC);
+            color: var(--primary-color, #0F6B5A);
+            border: 1px solid var(--primary-border, #9CCFC2);
             border-radius: 6px;
             padding: 2px 8px;
             font-size: 0.75rem;
             font-weight: 600;
         }
         .terms-actions {
-            border-top: 1px solid var(--ref-border, rgba(255, 255, 255, 0.08));
+            border-top: 1px solid var(--border-color-soft, #CBE3DC);
             padding-top: 24px;
             margin-top: 32px;
             display: flex;
@@ -109,8 +113,8 @@ require_once 'config/init.php';
             gap: 12px;
         }
         .btn-brand-outline {
-            color: #818CF8;
-            border: 1px solid rgba(129, 140, 248, 0.4);
+            color: var(--primary-color, #0F6B5A);
+            border: 1px solid var(--primary-border, #9CCFC2);
             background: transparent;
             border-radius: 8px;
             padding: 8px 18px;
@@ -120,13 +124,13 @@ require_once 'config/init.php';
             transition: all 0.2s ease;
         }
         .btn-brand-outline:hover {
-            background: rgba(129, 140, 248, 0.15);
-            color: #FFFFFF;
-            border-color: #818CF8;
+            background: var(--primary-soft, #E1F1EC);
+            color: var(--primary-hover, #0B5748);
+            border-color: var(--primary-color, #0F6B5A);
         }
         .btn-brand-primary {
-            background: #818CF8;
-            color: #070C18;
+            background: var(--primary-color, #0F6B5A);
+            color: #FFFFFF;
             font-weight: 600;
             border-radius: 8px;
             padding: 8px 20px;
@@ -135,10 +139,12 @@ require_once 'config/init.php';
             transition: all 0.2s ease;
         }
         .btn-brand-primary:hover {
-            background: #6366F1;
+            background: var(--primary-hover, #0B5748);
             color: #FFFFFF;
         }
     </style>
+    <link href="Assets/css/responsive-fix.css?v=2" rel="stylesheet">
+    <link href="Assets/css/fluid-layout.css?v=1" rel="stylesheet">
 </head>
 <body>
     <div class="terms-container">
@@ -150,8 +156,8 @@ require_once 'config/init.php';
                     <div class="terms-brand">
                         <div class="terms-logo">4B</div>
                         <div>
-                            <div class="fw-bold text-white lh-1">Manuela 4B</div>
-                            <small class="text-secondary" style="font-size: 0.75rem;">HOA Management System</small>
+                            <div class="fw-bold terms-brand-name lh-1">Manuela 4B</div>
+                            <small class="terms-brand-tag" style="font-size: 0.75rem;">HOA Management System</small>
                         </div>
                     </div>
                     <span class="terms-badge"><i class="bi bi-shield-check me-1"></i> Official Policy</span>
@@ -241,4 +247,3 @@ require_once 'config/init.php';
     </div>
 </body>
 </html>
-

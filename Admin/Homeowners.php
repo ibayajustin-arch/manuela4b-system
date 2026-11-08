@@ -5,7 +5,7 @@ require_once '../includes/homeowner_helpers.php';
 require_once '../includes/archive_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -71,7 +71,6 @@ $streetCounts = array_fill_keys($streets, 0);
 try {
     $archiveCondition = $archiveView ? 'h.archived_at IS NOT NULL' : 'h.archived_at IS NULL';
     if ($archiveReady) {
-        $countSql = "SELECT h.block, COUNT(*) AS total FROM homeowners h WHERE {$archiveCondition} AND LOWER(COALESCE(h.status, '')) <> 'pending'";
         if (!$archiveView) {
             $counts = $conn->query("SELECT block, COUNT(*) AS total FROM homeowners WHERE archived_at IS NULL AND LOWER(COALESCE(status, '')) <> 'pending' GROUP BY block");
             if ($counts) while ($row = $counts->fetch_assoc()) foreach ($streets as $street) {
@@ -188,26 +187,34 @@ try {
     $pendingResidentsCount = 0;
 }
 
+$csrf = generateCsrfToken();
+$exportQuery = http_build_query(array_filter([
+    'export' => 'csv',
+    'street' => $selectedStreet,
+    'search' => $search,
+    'unpaid' => $onlyUnpaid ? '1' : '',
+], static fn($v) => $v !== '' && $v !== null));
+
 require_once '../includes/header.php';
 ?>
 
 <div class="app-wrapper">
     <?php require_once '../includes/sidebar.php'; ?>
-    <div class="main-content">
+    <div class="main-content homeowners-page">
         <div class="container-fluid p-0">
 
             <?php if (isset($_SESSION['success_msg'])): ?>
                 <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 shadow-sm">
-                    <i class="bi bi-check-circle me-2"></i><?= $_SESSION['success_msg'] ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="bi bi-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success_msg']) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <?php unset($_SESSION['success_msg']); ?>
             <?php endif; ?>
 
             <?php if (isset($_SESSION['error_msg'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show border-0 rounded-3 shadow-sm">
-                    <i class="bi bi-exclamation-circle me-2"></i><?= $_SESSION['error_msg'] ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <i class="bi bi-exclamation-circle me-2"></i><?= htmlspecialchars($_SESSION['error_msg']) ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 <?php unset($_SESSION['error_msg']); ?>
             <?php endif; ?>
@@ -215,30 +222,28 @@ require_once '../includes/header.php';
                 <div class="alert alert-danger"><?= htmlspecialchars($archiveError) ?></div>
             <?php endif; ?>
 
-            <div class="page-header homeowners-page-header">
-                <div>
-                    <h1><?= $archiveView ? 'Archived Homeowners' : 'Homeowners' ?></h1>
-                    <p><?= $archiveView ? 'Restore archived homeowner accounts here.' : 'Manage verified resident accounts, contact details, and dues.' ?></p>
-                </div>
-                <div class="homeowners-page-actions">
-                    <a href="homeowners.php<?= $archiveView ? '' : '?view=archive' ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-<?= $archiveView ? 'people' : 'archive' ?> me-1"></i><?= $archiveView ? 'Back to Homeowners' : 'Archives' ?>
-                    </a>
-                    <?php if (!$archiveView): ?>
-                    <a href="pending_homeowners.php" class="btn btn-outline-warning pending-residents-action position-relative">
-                        <i class="bi bi-person-exclamation me-1"></i> Pending Residents
-                        <?php if ($pendingResidentsCount > 0): ?>
-                            <span class="badge bg-danger ms-1"><?= $pendingResidentsCount ?></span>
-                        <?php endif; ?>
-                    </a>
-                    <a href="homeowners.php?export=csv<?= $onlyUnpaid ? '&unpaid=1' : '' ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>" class="btn btn-outline-secondary">
-                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
-                    </a>
-                    <a href="homeowner_create.php" class="btn btn-primary shadow-sm">
-                        <i class="bi bi-person-plus-fill me-2"></i> Add Homeowner
-                    </a>
+            <div class="page-header">
+                <h1><?= $archiveView ? 'Archived Homeowners' : 'Homeowners' ?></h1>
+            </div>
+
+            <div class="homeowners-page-actions mb-4">
+                <a href="homeowners.php<?= $archiveView ? '' : '?view=archive' ?>" class="btn btn-outline-secondary">
+                    <i class="bi bi-<?= $archiveView ? 'people' : 'archive' ?> me-1"></i><?= $archiveView ? 'Back to Homeowners' : 'Archives' ?>
+                </a>
+                <?php if (!$archiveView): ?>
+                <a href="pending_homeowners.php" class="btn btn-outline-warning pending-residents-action position-relative">
+                    <i class="bi bi-person-exclamation me-1"></i> Pending Residents
+                    <?php if ($pendingResidentsCount > 0): ?>
+                        <span class="badge bg-danger ms-1"><?= $pendingResidentsCount ?></span>
                     <?php endif; ?>
-                </div>
+                </a>
+                <a href="homeowners.php?<?= htmlspecialchars($exportQuery) ?>" class="btn btn-outline-secondary">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
+                </a>
+                <a href="homeowner_create.php" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-person-plus-fill me-2"></i> Add Homeowner
+                </a>
+                <?php endif; ?>
             </div>
 
             <div class="card">
@@ -295,81 +300,54 @@ require_once '../includes/header.php';
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Property Address</th>
-                                    <th>Full Name</th>
-                                    <th>Contact</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
-                                    <th>Balance</th>
+                                    <th>Homeowners</th>
                                     <th class="text-center homeowner-actions-heading">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($homeowners as $h):
                                     $status = $archiveView ? 'archived' : ($h['status'] ?? 'inactive');
-                                    $badgeClass = 'badge-info';
-                                    if ($status === 'active') $badgeClass = 'badge-success';
-                                    elseif ($status === 'pending') $badgeClass = 'badge-warning';
-
-                                    $sum = $h['_sum'];
-                                    $hasUnpaid = $sum && $sum['unpaid_count'] > 0;
+                                    $hName = (string) ($h['full_name'] ?? 'homeowner');
                                 ?>
                                 <tr>
-                                    <td><?= htmlspecialchars(homeowner_address_label($h['block'] ?? '', $h['lot'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
-                                    <td class="fw-semibold text-dark"><?= htmlspecialchars($h['full_name'] ?? '') ?></td>
-                                    <td><?= htmlspecialchars($h['contact'] ?? '-') ?></td>
-                                    <td class="text-muted homeowner-email-cell"><?= htmlspecialchars($h['email'] ?? '-') ?></td>
-                                    <td>
-                                        <span class="badge <?= $badgeClass ?>"><?= ucfirst($status) ?></span>
-                                    </td>
-                                    <td class="text-nowrap">
-                                        <?php if ($sum === null): ?>
-                                            <span class="text-muted">—</span>
-                                        <?php elseif ($hasUnpaid):
-                                            $agingClass = $sum['streak'] <= 2 ? 'badge-warning' : 'badge-danger';
-                                        ?>
-                                            <div class="fw-bold" style="color: var(--danger-color);">₱ <?= number_format($sum['outstanding'], 2) ?></div>
-                                            <?php if ($sum['unpaid_count'] === 1): ?>
-                                                <div class="small text-muted mb-1">Unpaid for the month of <?= htmlspecialchars(date('F', strtotime($sum['unpaid'][0] . '-01'))) ?></div>
-                                            <?php else: ?>
-                                                <div class="small text-muted mb-1"><?= $sum['unpaid_count'] ?> months unpaid</div>
-                                            <?php endif; ?>
-                                            <span class="badge <?= $agingClass ?>"><?= htmlspecialchars(hv_aging_label($sum['streak'])) ?></span>
-                                        <?php else: ?>
-                                            <span class="badge badge-success"><i class="bi bi-check-circle me-1"></i>Paid up</span>
-                                        <?php endif; ?>
+                                    <td class="homeowner-name-cell">
+                                        <div class="homeowner-card-info">
+                                            <div class="homeowner-card-name"><?= htmlspecialchars($h['full_name'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
+                                            <div class="homeowner-card-address"><i class="bi bi-geo-alt" aria-hidden="true"></i> <?= htmlspecialchars(homeowner_address_label($h['block'] ?? '', $h['lot'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                                            <span class="homeowner-card-status <?= strtolower((string) $status) === 'active' ? 'is-active' : 'is-inactive' ?>"><?= strtolower((string) $status) === 'active' ? 'Active' : 'Inactive' ?></span>
+                                        </div>
                                     </td>
                                     <td class="homeowner-actions-cell">
                                         <div class="homeowner-actions">
-                                            <a href="homeowner_view.php?id=<?= $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-view" title="View profile" aria-label="View <?= htmlspecialchars($h['full_name'] ?? 'homeowner') ?> profile">
+                                            <a href="homeowner_view.php?id=<?= (int) $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-view" title="View profile" aria-label="View <?= htmlspecialchars($hName) ?> profile">
                                                 <i class="bi bi-eye"></i>
                                             </a>
 
                                             <?php if ($archiveView): ?>
                                                 <form method="POST" class="homeowner-archive-form" onsubmit="return confirm('Restore this homeowner account?');">
-                                                    <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
                                                     <input type="hidden" name="action" value="restore_homeowner">
                                                     <input type="hidden" name="homeowner_id" value="<?= (int) $h['id'] ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Restore homeowner" aria-label="Restore <?= htmlspecialchars($h['full_name'] ?? 'homeowner') ?> account">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success homeowner-action-btn" title="Restore homeowner" aria-label="Restore <?= htmlspecialchars($hName) ?> account">
                                                         <i class="bi bi-arrow-counterclockwise"></i>
                                                     </button>
                                                 </form>
                                             <?php elseif ($status === 'pending'): ?>
-                                                <a href="homeowner_view.php?id=<?= $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-review" title="Review application and ID" aria-label="Review homeowner application and ID">
+                                                <a href="homeowner_view.php?id=<?= (int) $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-review" title="Review application and ID" aria-label="Review homeowner application and ID">
                                                     <i class="bi bi-person-check"></i>
                                                 </a>
                                             <?php else: ?>
-                                                <a href="homeowner_edit.php?id=<?= $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-edit" title="Edit profile" aria-label="Edit <?= htmlspecialchars($h['full_name'] ?? 'homeowner') ?> profile">
+                                                <a href="homeowner_edit.php?id=<?= (int) $h['id'] ?>" class="btn btn-sm homeowner-action-btn homeowner-action-edit" title="Edit profile" aria-label="Edit <?= htmlspecialchars($hName) ?> profile">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                             <?php endif; ?>
 
                                             <?php if (!$archiveView): ?>
                                             <form method="POST" class="homeowner-archive-form" onsubmit="return confirm('Archive this homeowner account? You can restore it later from Archives.');">
-                                                <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                                                <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
                                                 <input type="hidden" name="action" value="archive_homeowner">
                                                 <input type="hidden" name="homeowner_id" value="<?= (int) $h['id'] ?>">
-                                                <button type="submit" class="btn btn-sm homeowner-action-btn homeowner-action-archive" title="Archive account" aria-label="Archive <?= htmlspecialchars($h['full_name'] ?? 'homeowner') ?> account">
+                                                <button type="submit" class="btn btn-sm homeowner-action-btn homeowner-action-archive" title="Archive account" aria-label="Archive <?= htmlspecialchars($hName) ?> account">
                                                     <i class="bi bi-archive"></i>
                                                 </button>
                                             </form>
@@ -380,7 +358,7 @@ require_once '../includes/header.php';
                                 <?php endforeach; ?>
 
                                 <?php if (empty($homeowners)): ?>
-                                <tr><td colspan="7" class="table-empty-state py-5 text-muted">
+                                <tr><td colspan="2" class="table-empty-state py-5 text-muted">
                                     <?= $archiveView ? 'No archived homeowners.' : ($onlyUnpaid ? 'No homeowners with unpaid dues. 🎉' : 'No homeowners found matching your search.') ?>
                                 </td></tr>
                                 <?php endif; ?>
@@ -388,11 +366,11 @@ require_once '../includes/header.php';
                         </table>
                     </div>
                     <?php if ($totalPages > 1): ?>
-                    <nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Homeowner pages">
+                    <nav class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3" aria-label="Homeowner pages">
                         <span class="small text-muted">Page <?= $page ?> of <?= $totalPages ?> · <?= number_format($totalRows) ?> homeowners</span>
                         <div class="btn-group">
                             <?php foreach (['Previous' => max(1, $page - 1), 'Next' => min($totalPages, $page + 1)] as $label => $targetPage): ?>
-                            <a class="btn btn-outline-secondary btn-sm <?= $targetPage === $page ? 'disabled' : '' ?>" href="?<?= http_build_query(array_merge($_GET, ['page' => $targetPage])) ?>" aria-disabled="<?= $targetPage === $page ? 'true' : 'false' ?>"><?= $label ?></a>
+                            <a class="btn btn-outline-secondary btn-sm <?= $targetPage === $page ? 'disabled' : '' ?>" href="?<?= htmlspecialchars(http_build_query(array_merge($_GET, ['page' => $targetPage]))) ?>" aria-disabled="<?= $targetPage === $page ? 'true' : 'false' ?>"><?= $label ?></a>
                             <?php endforeach; ?>
                         </div>
                     </nav>
@@ -402,5 +380,36 @@ require_once '../includes/header.php';
         </div>
     </div>
 </div>
+
+<style>
+    /* Desktop / shared look of the homeowner list.
+       The phone card layout lives in Assets/css/admin-compact.css. */
+    .homeowners-page .homeowners-table-wrap .table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+    }
+
+    .homeowners-page .homeowners-table-wrap .table th:last-child,
+    .homeowners-page .homeowners-table-wrap .table td:last-child {
+        width: 170px;
+    }
+
+    .homeowners-page .homeowner-card-info { display: grid; justify-items: start; gap: .28rem; min-width: 0; }
+    .homeowners-page .homeowner-card-name { color: #17483f; font-size: .98rem; font-weight: 700; line-height: 1.25; overflow-wrap: break-word; }
+    .homeowners-page .homeowner-card-address { color: #64756f; font-size: .8rem; font-weight: 500; line-height: 1.35; overflow-wrap: break-word; }
+    .homeowners-page .homeowner-card-address .bi { color: #0f6b5a; }
+    .homeowners-page .homeowner-card-status { display: inline-flex; align-items: center; padding: .15rem .5rem; border-radius: 999px; font-size: .7rem; font-weight: 700; line-height: 1.3; }
+    .homeowners-page .homeowner-card-status.is-active { color: #176044; background: #e7f5ed; }
+    .homeowners-page .homeowner-card-status.is-inactive { color: #667085; background: #eef1f3; }
+    .homeowners-page .homeowner-actions { display: flex; align-items: center; justify-content: flex-end; gap: .35rem; flex-wrap: nowrap; white-space: nowrap; }
+    .homeowners-page .homeowner-actions .homeowner-action-btn,
+    .homeowners-page .homeowner-actions .homeowner-archive-form .btn { flex: 0 0 40px; width: 40px; min-width: 40px; height: 40px; min-height: 40px; padding: 0; }
+
+    @media (max-width: 767.98px) {
+        .homeowners-page > .container-fluid > .card > .card-body { padding: .75rem; }
+        .homeowners-page .homeowners-table-wrap .table { table-layout: auto; }
+    }
+</style>
 
 <?php require_once '../includes/footer.php'; ?>

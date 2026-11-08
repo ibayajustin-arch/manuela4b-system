@@ -4,7 +4,7 @@ require_once '../config/db.php';
 require_once '../includes/homeowner_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -163,7 +163,7 @@ require_once '../includes/header.php';
                     <div class="text-center flex-shrink-0" style="min-width: 220px;">
                         <?php if ($has_photo): ?>
                             <div class="avatar-circle avatar-circle-photo">
-                                <img src="../<?= $e($homeowner['resident_photo']) ?>" alt="<?= $e($homeowner['full_name']) ?>">
+                                <img src="../<?= $e($homeowner['resident_photo']) ?>?v=<?= (int) filemtime('../' . $homeowner['resident_photo']) ?>" alt="<?= $e($homeowner['full_name']) ?>">
                             </div>
                         <?php else: ?>
                             <div class="avatar-circle">

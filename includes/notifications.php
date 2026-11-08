@@ -2,6 +2,7 @@
 // Notification helpers for Admin
 require_once __DIR__ . '/payment_methods.php';
 require_once __DIR__ . '/homeowner_helpers.php';
+require_once __DIR__ . '/dues_reminder.php';
 
 if (!function_exists('notification_url')) {
     function notification_url(string $path): string {
@@ -34,14 +35,53 @@ if (!function_exists('human_time_taglish')) {
     }
 }
 
+if (!function_exists('notification_mark_read')) {
+    // Saves "read up to now" per user in the database, so it survives logout.
+    // Uses the MySQL clock because notification timestamps come from MySQL.
+    function notification_mark_read(mysqli $conn, int $userId): void {
+        $conn->query("CREATE TABLE IF NOT EXISTS notification_reads (
+            user_id INT NOT NULL PRIMARY KEY,
+            last_read_at DATETIME NOT NULL
+        )");
+        $stmt = $conn->prepare("INSERT INTO notification_reads (user_id, last_read_at) VALUES (?, NOW())
+                                ON DUPLICATE KEY UPDATE last_read_at = NOW()");
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+    // A user with no saved time starts from now instead of showing old items as new.
+    function notification_last_read(mysqli $conn, int $userId): string {
+        try {
+            for ($attempt = 0; $attempt < 2; $attempt++) {
+                $row = null;
+                try {
+                    $stmt = $conn->prepare("SELECT last_read_at FROM notification_reads WHERE user_id = ?");
+                    if ($stmt) {
+                        $stmt->bind_param('i', $userId);
+                        $stmt->execute();
+                        $row = $stmt->get_result()->fetch_assoc();
+                        $stmt->close();
+                    }
+                } catch (Throwable $e) {}
+                if (!empty($row['last_read_at'])) return (string) $row['last_read_at'];
+                if ($attempt === 0) notification_mark_read($conn, $userId);
+            }
+        } catch (Throwable $e) {}
+        return date('Y-m-d H:i:s');
+    }
+}
+
 if (!function_exists('get_admin_notifications')) {
     function get_admin_notifications($conn, $limit = 25) {
         $items = [];
-        $lastRead = $_SESSION['admin_last_read_notif'] ?? date('Y-m-d H:i:s', strtotime('-3 days'));
 
         if (!$conn || !($conn instanceof mysqli)) {
             return ['items' => [], 'unread_count' => 0];
         }
+
+        $currentUserId = (int) ($_SESSION['user_id'] ?? 0);
+        $lastRead = notification_last_read($conn, $currentUserId);
 
         // 1. Recent Payments
         try {
@@ -227,11 +267,54 @@ if (!function_exists('get_admin_notifications')) {
                         'icon' => 'bi-activity',
                         'icon_bg' => '#EDE9FE',
                         'icon_color' => '#6D28D9',
-                        'is_unread' => strtotime($createdAt) > strtotime($lastRead)
+                        // An admin's own actions are not news to that admin.
+                        'is_unread' => strtotime($createdAt) > strtotime($lastRead) && (int) ($r['user_id'] ?? 0) !== $currentUserId
                     ];
                 }
             }
         } catch (Exception $e) {}
+
+        // 6. Automatic monthly dues reminder runs (summary for admins).
+        try {
+            $maxAttempts = (int) DUES_REMINDER_MAX_ATTEMPTS;
+            $qDues = $conn->query(
+                "SELECT r.period, r.queued_count, r.queued_at, r.finished_at,
+                        COALESCE(SUM(l.status = 'sent'), 0) AS sent_count,
+                        COALESCE(SUM(l.status = 'failed' AND l.attempts >= {$maxAttempts}), 0) AS failed_count
+                 FROM dues_reminder_runs r
+                 LEFT JOIN dues_reminder_log l ON l.period = r.period
+                 GROUP BY r.period, r.queued_count, r.queued_at, r.finished_at
+                 ORDER BY r.period DESC LIMIT 3"
+            );
+            if ($qDues) {
+                while ($r = $qDues->fetch_assoc()) {
+                    $month = dues_reminder_month_label((string) $r['period']);
+                    $sent = (int) $r['sent_count'];
+                    $total = (int) $r['queued_count'];
+                    $failed = (int) $r['failed_count'];
+                    $state = $r['finished_at'] !== null ? 'Done' : 'Sending';
+                    $desc = "Monthly dues reminder for <strong>" . htmlspecialchars($month) . "</strong> emailed to <strong>{$sent} of {$total}</strong> homeowners.";
+                    if ($failed > 0) $desc .= " {$failed} could not be delivered.";
+                    $desc .= ' <span class="badge ' . ($state === 'Done' ? 'bg-success' : 'bg-warning text-dark') . '">' . $state . '</span>';
+                    $createdAt = $r['queued_at'] ?? '';
+                    $items[] = [
+                        'id' => 'dues_run_' . $r['period'],
+                        'type' => 'dues_reminder',
+                        'category_label' => 'Dues Reminder',
+                        'title' => 'Monthly Dues Reminders Sent',
+                        'description' => $desc,
+                        'time' => $createdAt,
+                        'time_ago' => human_time_ago($createdAt),
+                        'link' => notification_url('/admin/payments.php'),
+                        'icon' => 'bi-envelope-paper-fill',
+                        'icon_bg' => '#CCFBF1',
+                        'icon_color' => '#0F766E',
+                        'is_unread' => strtotime($createdAt) > strtotime($lastRead)
+                    ];
+                }
+                $qDues->free();
+            }
+        } catch (Throwable $e) {}
 
         // Sort by newest first
         usort($items, function($a, $b) {
@@ -255,7 +338,7 @@ if (!function_exists('get_admin_notifications')) {
 if (!function_exists('get_resident_notifications')) {
     function get_resident_notifications(mysqli $conn, int $userId, int $limit = 25): array {
         $items = [];
-        $lastRead = $_SESSION['resident_last_read_notif'] ?? date('Y-m-d H:i:s', strtotime('-3 days'));
+        $lastRead = notification_last_read($conn, $userId);
         $lastReadTs = strtotime((string) $lastRead) ?: 0;
         $add = static function (array $item) use (&$items, $lastReadTs): void {
             $item['is_unread'] = (strtotime((string) ($item['time'] ?? '')) ?: 0) > $lastReadTs;
@@ -336,6 +419,24 @@ if (!function_exists('get_resident_notifications')) {
                     'time' => $row['admin_replied_at'], 'link' => notification_url('/resident/feedback.php'), 'icon' => 'bi-chat-left-heart-fill', 'icon_bg' => '#FEE2E2', 'icon_color' => '#B91C1C']);
             }
             $stmt->close();
+        } catch (Throwable $e) {}
+
+        // Monthly dues reminders for this resident (shows even if the email bounced).
+        try {
+            $stmt = $conn->prepare("SELECT id, period, status, COALESCE(sent_at, created_at) AS notif_time FROM dues_reminder_log WHERE user_id = ? ORDER BY period DESC LIMIT 3");
+            if ($stmt) {
+                $stmt->bind_param('i', $userId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $amount = number_format(defined('MONTHLY_DUES_AMOUNT') ? (float) MONTHLY_DUES_AMOUNT : 0, 2);
+                while ($row = $result->fetch_assoc()) {
+                    $month = dues_reminder_month_label((string) $row['period']);
+                    $add(['id' => 'resident_dues_' . $row['id'], 'type' => 'dues_reminder', 'category_label' => 'Dues Reminder',
+                        'title' => 'Monthly dues for ' . $month, 'description' => htmlspecialchars('Your ₱' . $amount . ' monthly dues for ' . $month . ' are now due.' . ($row['status'] === 'sent' ? ' A reminder was also sent to your email.' : '')),
+                        'time' => $row['notif_time'], 'link' => notification_url('/resident/payments.php'), 'icon' => 'bi-envelope-paper-fill', 'icon_bg' => '#CCFBF1', 'icon_color' => '#0F766E']);
+                }
+                $stmt->close();
+            }
         } catch (Throwable $e) {}
 
         usort($items, static fn($a, $b) => strcmp((string) $b['time'], (string) $a['time']));

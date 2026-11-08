@@ -6,7 +6,7 @@ require_once '../includes/payment_methods.php';
 require_once '../includes/homeowner_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit;
 }
 
@@ -59,6 +59,12 @@ function scalar_query($conn, $sql, $types = '', $params = []) {
     } catch (Exception $e) {
         return 0;
     }
+}
+
+function dashboard_initial($name) {
+    $name = trim((string) $name);
+    if ($name === '') return '?';
+    return function_exists('mb_substr') ? mb_strtoupper(mb_substr($name, 0, 1)) : strtoupper(substr($name, 0, 1));
 }
 
 $current_period = date('Y-m');
@@ -209,7 +215,7 @@ require_once '../includes/header.php';
 
         <!-- Stat cards (action-oriented) -->
         <div class="row g-4 mb-4 dashboard-kpi-row">
-            <div class="col-xl-3 col-sm-6">
+            <div class="col-lg-4 col-sm-6">
                 <a href="homeowners.php" class="text-decoration-none d-block h-100">
                     <div class="card stat-card-pastel pastel-green hover-lift h-100">
                         <div class="card-body stat-card">
@@ -230,24 +236,7 @@ require_once '../includes/header.php';
                 </a>
             </div>
 
-            <div class="col-xl-3 col-sm-6">
-                <a href="reservations.php" class="text-decoration-none d-block h-100">
-                    <div class="card stat-card-pastel pastel-blue hover-lift h-100">
-                        <div class="card-body stat-card">
-                            <div class="stat-icon" style="background: rgba(255,255,255,0.75); color: var(--info-color);"><i class="bi bi-calendar-check"></i></div>
-                            <div>
-                                <p class="stat-label mb-1">Pending Reservations</p>
-                                <p class="stat-value mb-1"><?= number_format($pending_reservations) ?></p>
-                                <p class="stat-note mb-0" style="font-size: 0.78rem; color: var(--text-muted);">
-                                    <?= $pending_reservations > 0 ? 'Waiting for your approval' : 'Nothing waiting' ?>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-xl-3 col-sm-6">
+            <div class="col-lg-4 col-sm-6">
                 <a href="payments.php" class="text-decoration-none d-block h-100">
                     <div class="card stat-card-pastel pastel-amber hover-lift h-100">
                         <div class="card-body stat-card">
@@ -270,7 +259,7 @@ require_once '../includes/header.php';
                 </a>
             </div>
 
-            <div class="col-xl-3 col-sm-6">
+            <div class="col-lg-4 col-sm-6">
                 <a href="analytics.php" class="text-decoration-none d-block h-100">
                     <div class="card stat-card-pastel pastel-red hover-lift h-100">
                         <div class="card-body stat-card">
@@ -343,23 +332,26 @@ require_once '../includes/header.php';
                             </div>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($topFollowUp as $e): ?>
-                        <div class="tx-row">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="tx-avatar" style="background-color: var(--danger-soft); color: var(--danger-color);" aria-hidden="true"><?= strtoupper(substr($e['name'], 0, 1)) ?></div>
-                                <div>
-                                    <p class="mb-0 fw-semibold" style="color: var(--text-heading); font-size: 0.9rem;"><?= htmlspecialchars($e['name']) ?></p>
-                                    <p class="mb-0" style="font-size: 0.85rem; color: var(--text-muted);"><?= $e['streak'] === 1 ? 'Unpaid for the month of ' . htmlspecialchars(date('F', strtotime($current_period . '-01'))) : $e['streak'] . ' months unpaid' ?> &middot; <?= htmlspecialchars(homeowner_address_label($e['block'] ?? '', $e['lot'] ?? ''), ENT_QUOTES, 'UTF-8') ?></p>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <span class="fw-semibold" style="color: var(--text-heading);">₱<?= number_format($e['amount'], 2) ?></span>
-                                <a href="homeowner_view.php?id=<?= $e['id'] ?>" class="btn btn-sm btn-outline-secondary">View</a>
-                            </div>
+                        <?php foreach ($topFollowUp as $fu):
+                            $fuMonths = $fu['streak'] === 1
+                                ? 'Unpaid for the month of ' . date('F', strtotime($current_period . '-01'))
+                                : $fu['streak'] . ' months unpaid';
+                        ?>
+                        <div class="compact-row">
+                            <div class="tx-avatar" style="background-color: var(--danger-soft); color: var(--danger-color);" aria-hidden="true"><?= htmlspecialchars(dashboard_initial($fu['name'])) ?></div>
+                            <span class="compact-name"><?= htmlspecialchars($fu['name']) ?></span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                data-bs-toggle="modal" data-bs-target="#followUpModal"
+                                data-name="<?= htmlspecialchars($fu['name'], ENT_QUOTES) ?>"
+                                data-months="<?= htmlspecialchars($fuMonths, ENT_QUOTES) ?>"
+                                data-address="<?= htmlspecialchars(homeowner_address_label($fu['block'] ?? '', $fu['lot'] ?? ''), ENT_QUOTES) ?>"
+                                data-amount="₱<?= number_format($fu['amount'], 2) ?>"
+                                data-url="homeowner_view.php?id=<?= (int) $fu['id'] ?>"
+                                aria-label="View follow-up details for <?= htmlspecialchars($fu['name'], ENT_QUOTES) ?>">View</button>
                         </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
-                    <div class="mt-3"><a href="analytics.php" class="fw-semibold">See the full delinquency breakdown in Analytics <i class="bi bi-arrow-right"></i></a></div>
+                    <div class="mt-3"><a href="analytics.php?view=late" class="fw-semibold">See the full delinquency breakdown in Analytics <i class="bi bi-arrow-right"></i></a></div>
                 </section>
             </div>
             <div class="col-lg-4">
@@ -384,9 +376,9 @@ require_once '../includes/header.php';
             </div>
         </div>
 
-        <!-- Row: Collection progress + Pending reservations + Recent transactions -->
+        <!-- Row: Collection progress + Recent transactions -->
         <div class="row g-4">
-            <div class="col-lg-4">
+            <div class="col-lg-6">
                 <div class="card card-body h-100">
                     <h2 class="mb-0" style="font-size: 1rem;">Collection Progress</h2>
                     <p class="mb-3" style="font-size: 0.8rem; color: var(--text-muted);"><?= date('F Y') ?></p>
@@ -417,40 +409,7 @@ require_once '../includes/header.php';
                 </div>
             </div>
 
-            <div class="col-lg-4">
-                <div class="card card-body h-100">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div>
-                            <h2 class="mb-0" style="font-size: 1rem;">Pending Reservations</h2>
-                            <p class="mb-0" style="font-size: 0.8rem; color: var(--text-muted);">Needs your decision</p>
-                        </div>
-                        <a href="reservations.php" class="btn btn-sm btn-outline-secondary">Review</a>
-                    </div>
-
-                    <?php if (empty($pendingRes)): ?>
-                        <div class="table-empty-state">
-                            <i class="bi bi-calendar-check fs-2 d-block mb-2"></i>
-                            No pending requests.
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($pendingRes as $r): ?>
-                        <div class="tx-row" style="padding-left: 0; padding-right: 0;">
-                            <div>
-                                <p class="mb-0 fw-semibold" style="color: var(--text-heading); font-size: 0.9rem;"><?= htmlspecialchars($r['facility'] ?? '') ?></p>
-                                <p class="mb-0" style="font-size: 0.75rem; color: var(--text-muted);">
-                                    <?= htmlspecialchars($r['reserved_by'] ?? 'Unknown') ?> &middot;
-                                    <?= !empty($r['res_date']) ? date('M j', strtotime($r['res_date'])) : '' ?>,
-                                    <?= !empty($r['start_time']) ? date('g:i A', strtotime($r['start_time'])) : '' ?>
-                                </p>
-                            </div>
-                            <span class="badge badge-warning">Pending</span>
-                        </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
+            <div class="col-lg-6">
                 <div class="card card-body h-100">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <div>
@@ -464,22 +423,18 @@ require_once '../includes/header.php';
                         <div class="table-empty-state">No recent transactions.</div>
                     <?php else: ?>
                         <?php foreach ($recentTx as $tx):
-                            $name = $tx['homeowner_name'] ?? 'Unknown';
+                            $name = !empty($tx['homeowner_name']) ? $tx['homeowner_name'] : 'Unknown';
+                            $periodRaw = (string) ($tx['period_covered'] ?? '');
+                            $periodLabel = preg_match('/^\d{4}-\d{2}$/', $periodRaw)
+                                ? date('F Y', strtotime($periodRaw . '-01'))
+                                : '';
                         ?>
-                        <div class="tx-row" style="padding-left: 0; padding-right: 0;">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="tx-avatar"><?= strtoupper(substr($name, 0, 1)) ?></div>
-                                <div>
-                                    <p class="mb-0 fw-semibold" style="color: var(--text-heading); font-size: 0.88rem;"><?= htmlspecialchars($name) ?></p>
-                                    <div class="d-flex align-items-center gap-2 mt-1">
-                                        <span style="font-size: 0.72rem; color: var(--text-muted);">
-                                            <?= !empty($tx['payment_date']) ? date('M j', strtotime($tx['payment_date'])) : '' ?>
-                                        </span>
-                                        <?= payment_method_indicator_html($tx['payment_method'] ?? null, $tx['notes'] ?? null) ?>
-                                    </div>
-                                </div>
+                        <div class="compact-row">
+                            <div class="tx-avatar" aria-hidden="true"><?= htmlspecialchars(dashboard_initial($name)) ?></div>
+                            <div class="compact-text">
+                                <span class="compact-name"><?= htmlspecialchars($name) ?></span>
+                                <span class="compact-sub">Paid for <?= $periodLabel !== '' ? 'the month of ' . htmlspecialchars($periodLabel) : 'dues' ?></span>
                             </div>
-                            <span class="fw-semibold" style="color: var(--text-heading); font-size: 0.88rem;">₱<?= number_format($tx['amount_paid'], 2) ?></span>
                         </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -490,14 +445,41 @@ require_once '../includes/header.php';
     </div>
 </div>
 
+<div class="modal fade" id="followUpModal" tabindex="-1" aria-labelledby="fuName" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="fuName"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <dl class="detail-list">
+          <dt>Status</dt><dd id="fuMonths"></dd>
+          <dt>Address</dt><dd id="fuAddress"></dd>
+          <dt>Amount due</dt><dd id="fuAmount"></dd>
+        </dl>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button><a href="#" id="fuLink" class="btn btn-primary">Open profile</a></div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('followUpModal').addEventListener('show.bs.modal', function (e) {
+    if (!e.relatedTarget) return;
+    var d = e.relatedTarget.dataset;
+    document.getElementById('fuName').textContent = d.name || '';
+    document.getElementById('fuMonths').textContent = d.months || '';
+    document.getElementById('fuAddress').textContent = d.address || '—';
+    document.getElementById('fuAmount').textContent = d.amount || '';
+    document.getElementById('fuLink').href = d.url || '#';
+});
+</script>
+
 <script>
 window.dashboardCollectionChart = new Chart(document.getElementById('collectionRing').getContext('2d'), {
     type: 'doughnut',
     data: {
-        labels: ['Paid', 'Unpaid'],
+        labels: ['Paid', 'Not fully paid'],
         datasets: [{
             data: [<?= $billable_count > 0 ? (int) $paid_accounts : 0 ?>, <?= (int) $dues_accounts ?>],
-            backgroundColor: ['#818CF8', 'rgba(255, 255, 255, 0.08)'],
+            backgroundColor: ['#15803D', '#D1C7E3'],
             borderWidth: 0
         }]
     },
@@ -510,6 +492,6 @@ window.dashboardCollectionChart = new Chart(document.getElementById('collectionR
 });
 </script>
 
-<script src="../Assets/js/admin-dashboard-analytics.js?v=20"></script>
+<script src="../Assets/js/admin-dashboard-analytics.js?v=22"></script>
 
 <?php require_once '../includes/footer.php'; ?>

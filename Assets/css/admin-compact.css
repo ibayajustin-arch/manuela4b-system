@@ -1,0 +1,173 @@
+/* ========================================================
+   ADMIN COMPACT LAYER  (Assets/css/admin-compact.css)
+   Load LAST in includes/header.php, after fluid-layout.css.
+   ======================================================== */
+
+/* ---------- Shared compact row (dashboard Needs Follow-up) ---------- */
+.compact-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .7rem 0;
+  border-bottom: 1px solid var(--border-color-soft);
+}
+.compact-row:last-of-type { border-bottom: 0; }
+.compact-row .compact-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--text-heading);
+  overflow-wrap: break-word;
+}
+.compact-row .btn { flex: 0 0 auto; white-space: nowrap; }
+
+/* Detail list inside the small modals */
+.detail-list { display: grid; grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr); gap: .65rem 1rem; margin: 0; }
+.detail-list dt { color: var(--text-muted); font-weight: 600; }
+.detail-list dd { margin: 0; font-weight: 600; color: var(--text-heading); overflow-wrap: break-word; }
+
+/* ---------- Desktop tweaks for the trimmed tables ---------- */
+.admin-feedback-table td, .admin-payments-table td { vertical-align: middle; }
+
+/* ==========================================================
+   MOBILE (<= 767px)
+   ========================================================== */
+@media (max-width: 767.98px) {
+
+  /* Buttons that show only an icon on phones */
+  html body .main-content :is(.admin-reservations-table, .admin-payments-table) .btn-label { display: none !important; }
+  html body .main-content :is(.admin-reservations-table, .admin-payments-table) td .btn:has(.btn-label) {
+    width: 40px !important; min-width: 40px !important; padding: 0 !important;
+  }
+  html body .main-content :is(.admin-reservations-table, .admin-payments-table) td .btn:has(.btn-label) i { margin: 0 !important; }
+
+  /* ---------------- RESERVATIONS ---------------- */
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody tr:not(:has(.table-empty-state)) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "name actions" "status actions" !important;
+    align-items: center !important;
+    gap: .2rem .6rem !important;
+    padding: .7rem !important;
+  }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(1),
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(3),
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(4),
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(5) { display: none !important; }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(2) {
+    grid-area: name !important; font-weight: 700; font-size: 1rem;
+  }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(6) {
+    grid-area: status !important; text-align: left !important; justify-self: start !important;
+  }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(2)::before,
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(6)::before,
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child::before { display: none !important; content: none !important; }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child {
+    grid-area: actions !important;
+    display: flex !important; flex-wrap: nowrap !important; align-items: center; justify-content: flex-end;
+    gap: .35rem !important; margin: 0 !important; padding: 0 !important; border: 0 !important;
+  }
+  html body .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child .btn {
+    width: 40px !important; min-width: 40px !important; height: 40px; margin: 0 !important; padding: 0 !important;
+  }
+
+  /* ---------------- DUES PAYMENTS ---------------- */
+  html body .main-content .admin-payments-table tbody tr:not(:has(.table-empty-state)) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "name actions" "ref actions" "period actions" !important;
+    align-items: center !important;
+    gap: .2rem .6rem !important;
+    padding: .7rem !important;
+  }
+  html body .main-content .admin-payments-table tbody td { display: none !important; }
+  html body .main-content .admin-payments-table tbody td.pay-name,
+  html body .main-content .admin-payments-table tbody td.pay-ref,
+  html body .main-content .admin-payments-table tbody td.pay-period,
+  html body .main-content .admin-payments-table tbody td.pay-actions { display: block !important; }
+  html body .main-content .admin-payments-table tbody td.pay-name { grid-area: name !important; font-size: 1rem; }
+  html body .main-content .admin-payments-table tbody td.pay-name .small { display: none; }
+  html body .main-content .admin-payments-table tbody td.pay-ref { grid-area: ref !important; font-size: .85rem; color: var(--text-muted); }
+  html body .main-content .admin-payments-table tbody td.pay-period { grid-area: period !important; }
+  html body .main-content .admin-payments-table tbody td.pay-actions {
+    grid-area: actions !important; display: flex !important; padding: 0 !important; border: 0 !important;
+    position: static !important; box-shadow: none !important; background: transparent !important; min-width: 0 !important;
+  }
+  html body .main-content .admin-payments-table tbody td::before { display: none !important; content: none !important; }
+  html body .main-content .admin-payments-table .payment-record-actions {
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; gap: .35rem !important;
+  }
+  html body .main-content .admin-payments-table .payment-record-actions .btn {
+    width: 40px !important; min-width: 40px !important; height: 40px; padding: 0 !important;
+  }
+
+  /* ---------------- FEEDBACK ---------------- */
+  html body .main-content .admin-feedback-table tbody tr:not(:has(.table-empty-state)) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-areas: "name name" "type status" "details archive" !important;
+    gap: .4rem .6rem !important;
+    padding: .8rem !important;
+  }
+  html body .main-content .admin-feedback-table tbody td.fb-name { grid-area: name !important; font-size: 1rem; }
+  html body .main-content .admin-feedback-table tbody td.fb-type { grid-area: type !important; justify-self: start !important; }
+  html body .main-content .admin-feedback-table tbody td.fb-status { grid-area: status !important; justify-self: end !important; text-align: right !important; }
+  html body .main-content .admin-feedback-table tbody td.fb-details { grid-area: details !important; }
+  html body .main-content .admin-feedback-table tbody td.fb-archive { grid-area: archive !important; }
+  html body .main-content .admin-feedback-table tbody td::before { display: none !important; content: none !important; }
+  html body .main-content .admin-feedback-table tbody td.fb-details,
+  html body .main-content .admin-feedback-table tbody td.fb-archive {
+    display: block !important; grid-column: auto !important; padding: .25rem 0 0 !important; border: 0 !important;
+    position: static !important; box-shadow: none !important; background: transparent !important;
+  }
+  html body .main-content .admin-feedback-table tbody td.fb-details .btn,
+  html body .main-content .admin-feedback-table tbody td.fb-archive .btn,
+  html body .main-content .admin-feedback-table tbody td.fb-archive form {
+    display: flex !important; width: 100% !important; max-width: none !important; min-height: 44px !important;
+    align-items: center; justify-content: center; margin: 0 !important;
+  }
+
+  /* ---------------- HOMEOWNERS: keep buttons on screen ---------------- */
+  html body .homeowners-page .homeowners-table-wrap { overflow: visible !important; }
+  html body .homeowners-page .homeowners-table-wrap .table {
+    display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important; table-layout: auto !important;
+  }
+  html body .homeowners-page .homeowners-table-wrap .table thead { display: none !important; }
+  html body .homeowners-page .homeowners-table-wrap .table tbody { display: block !important; }
+  html body .homeowners-page .homeowners-table-wrap .table tbody tr:not(:has(.table-empty-state)) {
+    display: flex !important; flex-wrap: nowrap !important; align-items: center !important;
+    justify-content: space-between !important; gap: .6rem !important;
+    width: 100% !important; max-width: 100% !important; margin: 0 0 .6rem !important; padding: .65rem !important;
+    box-sizing: border-box;
+  }
+  html body .homeowners-page .homeowners-table-wrap .table tbody td.homeowner-name-cell {
+    display: block !important; flex: 1 1 0 !important; min-width: 0 !important; padding: 0 !important; border: 0 !important;
+  }
+  html body .homeowners-page .homeowners-table-wrap .table tbody td.homeowner-actions-cell {
+    display: block !important; flex: 0 0 auto !important; width: auto !important; min-width: 0 !important;
+    padding: 0 !important; border: 0 !important; position: static !important; box-shadow: none !important; background: transparent !important;
+  }
+  html body .homeowners-page .homeowners-table-wrap .table tbody td::before { display: none !important; content: none !important; }
+  html body .homeowners-page .homeowner-actions { display: flex !important; flex-wrap: nowrap !important; gap: .3rem !important; justify-content: flex-end !important; }
+  html body .homeowners-page .homeowner-actions .homeowner-action-btn,
+  html body .homeowners-page .homeowner-actions .homeowner-archive-form .btn {
+    flex: 0 0 40px !important; width: 40px !important; min-width: 40px !important; height: 40px !important; min-height: 40px !important;
+  }
+  html body .homeowners-page .homeowner-card-address { overflow-wrap: anywhere; }
+
+  /* ---------------- MANAGE DUES (Settings) ---------------- */
+  html body .settings-page--admin .settings-dues-section tbody tr:not(:has(.table-empty-state)) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-areas: "address" "homeowner" "due" !important;
+    overflow: hidden; box-sizing: border-box; max-width: 100%;
+  }
+  html body .settings-page--admin .settings-dues-section tbody td:nth-child(3) { display: none !important; }
+  html body .settings-page--admin .settings-dues-section .input-group {
+    display: flex !important; flex-wrap: nowrap !important; width: 100% !important; max-width: 100% !important;
+  }
+  html body .settings-page--admin .settings-dues-section .input-group .form-control {
+    flex: 1 1 auto !important; width: 1% !important; min-width: 0 !important;
+  }
+  html body .settings-page--admin .settings-dues-section .table-responsive { overflow: hidden !important; }
+}

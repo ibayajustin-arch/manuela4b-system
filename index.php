@@ -7,7 +7,7 @@ if (isset($_SESSION['user_id'])) {
         header("Location: " . BASE_PATH . "/admin/dashboard.php");
     } else {
         // If logged in as resident, go to the new resident folder
-        header("Location: " . BASE_PATH . "/resident/profile.php");
+        header("Location: " . BASE_PATH . "/resident/dashboard.php");
     }
 } else {
     // If not logged in, go to login

@@ -1,0 +1,558 @@
+.dues-homeowner-cell {
+    display: inline;
+}
+
+.dues-homeowner-details {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .mobile-topbar-brand {
+        font-size: 0.95rem;
+    }
+
+    .sidebar-logo-box {
+        width: 36px;
+        height: 36px;
+    }
+
+    .sidebar-brand-text .brand-name {
+        font-size: 1rem;
+    }
+
+    .main-content .page-header h1 {
+        font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+        line-height: 1.25;
+        text-wrap: balance;
+    }
+
+    .main-content .btn:not(.btn-icon):not(.homeowner-action-btn):not(.btn-close):not(.btn-topbar-bell):not(.password-visibility-toggle) {
+        min-height: 40px;
+        padding: 0.4rem 0.7rem;
+        font-size: 0.94rem;
+    }
+
+    .main-content :is(.admin-reservations-table, .admin-payments-table, .admin-feedback-table) tbody tr:not(:has(.table-empty-state)) {
+        border-radius: 12px;
+        gap: 0.45rem 0.7rem;
+        padding: 0.8rem;
+    }
+
+    .main-content :is(.admin-reservations-table, .admin-payments-table, .admin-feedback-table) tbody td::before {
+        margin-bottom: 0.15rem;
+        font-size: 0.85rem;
+        line-height: 1.25;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody tr:not(:has(.table-empty-state)) {
+        grid-template-areas:
+            "facility status"
+            "resident resident"
+            "date time"
+            "payment payment"
+            "actions actions";
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(1) {
+        grid-area: facility;
+        align-self: center;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(6) {
+        grid-area: status;
+        justify-self: end;
+        text-align: right;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(2) {
+        grid-area: resident;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(3) {
+        grid-area: date;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(4) {
+        grid-area: time;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(5) {
+        grid-area: payment;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(1)::before,
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(6)::before {
+        display: none;
+        content: none;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child {
+        grid-area: actions;
+        justify-content: flex-start;
+        gap: 0.45rem;
+        margin-top: 0.2rem;
+        padding-top: 0.6rem !important;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:nth-child(5) .btn {
+        margin-top: 0.35rem !important;
+    }
+
+    .main-content.page-admin-reservations .admin-reservations-table tbody td:last-child .btn {
+        min-width: 40px;
+        min-height: 40px;
+        margin: 0 !important;
+        font-size: 0.94rem;
+    }
+
+    .main-content .admin-payments-table tbody tr:not(:has(.table-empty-state)) {
+        grid-template-areas:
+            "receipt status"
+            "homeowner homeowner"
+            "date amount"
+            "period method"
+            "actions actions";
+    }
+
+    .admin-payments-table tbody td:nth-child(1) { grid-area: receipt; }
+    .admin-payments-table tbody td:nth-child(2) { grid-area: homeowner; }
+    .admin-payments-table tbody td:nth-child(3) { grid-area: date; }
+    .admin-payments-table tbody td:nth-child(4) { grid-area: period; }
+    .admin-payments-table tbody td:nth-child(5) { grid-area: method; }
+    .admin-payments-table tbody td:nth-child(6) { grid-area: amount; text-align: right !important; }
+    .admin-payments-table tbody td:nth-child(7) { grid-area: status; text-align: right; }
+    .admin-payments-table tbody td:nth-child(1)::before,
+    .admin-payments-table tbody td:nth-child(7)::before {
+        display: none;
+        content: none;
+    }
+
+    .admin-payments-table tbody td:last-child {
+        display: flex !important;
+        grid-column: 1 / -1;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.15rem;
+        padding-top: 0.6rem !important;
+        border-top: 1px solid var(--border-color, #dce7e2) !important;
+    }
+
+    .admin-payments-table tbody td:last-child::before,
+    .admin-feedback-table tbody td:last-child::before {
+        display: none !important;
+        content: none !important;
+    }
+
+    .admin-payments-table .payment-record-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.45rem;
+    }
+
+    .admin-payments-table tbody td:last-child .btn,
+    .admin-feedback-table tbody td:nth-child(6) .btn,
+    .admin-feedback-table tbody td:nth-child(7) .btn {
+        width: auto !important;
+        max-width: 100%;
+        min-height: 40px;
+        margin: 0 !important;
+        font-size: 0.94rem;
+        white-space: normal;
+    }
+
+    .main-content .admin-feedback-table tbody td:nth-child(6) .btn,
+    .main-content .admin-feedback-table tbody td:last-child .btn {
+        min-height: 40px !important;
+    }
+
+    .main-content .admin-feedback-table tbody tr:not(:has(.table-empty-state)) {
+        grid-template-areas:
+            "resident type"
+            "subject subject"
+            "submitted status"
+            "details archive";
+    }
+
+    .admin-feedback-table tbody td:nth-child(1) { grid-area: resident; }
+    .admin-feedback-table tbody td:nth-child(2) { grid-area: type; justify-self: end; }
+    .admin-feedback-table tbody td:nth-child(3) { grid-area: subject; }
+    .admin-feedback-table tbody td:nth-child(4) { grid-area: submitted; }
+    .admin-feedback-table tbody td:nth-child(5) { grid-area: status; justify-self: end; }
+    .admin-feedback-table tbody td:nth-child(6) { grid-area: details;     }
+
+    .admin-feedback-table tbody td:nth-child(7) { grid-area: archive; }
+    .main-content .admin-feedback-table tbody td:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+
+    .main-content .admin-feedback-table tbody td:nth-child(4) {
+        grid-column: auto;
+    }
+    .admin-feedback-table tbody td:nth-child(6),
+    .admin-feedback-table tbody td:nth-child(7) {
+        display: flex !important;
+        grid-column: auto !important;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        min-width: 0;
+        padding-top: 0.55rem !important;
+        border-top: 1px solid var(--border-color, #dce7e2) !important;
+    }
+
+    .admin-feedback-table tbody td:nth-child(2)::before,
+    .admin-feedback-table tbody td:nth-child(5)::before,
+    .admin-feedback-table tbody td:nth-child(6)::before,
+    .admin-feedback-table tbody td:nth-child(7)::before {
+        display: none !important;
+        content: none !important;
+    }
+
+    .homeowners-page .homeowner-card-name {
+        font-size: 1rem !important;
+        line-height: 1.3;
+    }
+
+    .homeowners-page .homeowner-card-address,
+    .homeowners-page .homeowner-card-status {
+        font-size: 0.9rem !important;
+        line-height: 1.35;
+    }
+
+    .homeowners-page .homeowner-actions {
+        gap: 0.25rem;
+    }
+
+    .homeowners-page .homeowner-actions .homeowner-action-btn,
+    .homeowners-page .homeowner-actions .homeowner-archive-form .btn {
+        flex-basis: 40px;
+        width: 40px;
+        min-width: 40px;
+        min-height: 40px;
+    }
+
+    .settings-page--admin .settings-dues-section .table-responsive {
+        overflow: visible;
+    }
+
+    .settings-page--admin .settings-dues-section table {
+        display: block;
+        width: 100%;
+    }
+
+    .settings-page--admin .settings-dues-section thead {
+        display: none;
+    }
+
+    .settings-page--admin .settings-dues-section tbody {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .settings-page--admin .settings-dues-section tbody tr:not(:has(.table-empty-state)) {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+            "address status"
+            "homeowner homeowner"
+            "due due";
+        gap: 0.4rem 0.7rem;
+        width: 100%;
+        padding: 0.8rem;
+        border: 1px solid var(--border-color, #dce7e2);
+        border-radius: 12px;
+        background: var(--card-bg, #fff);
+        box-shadow: 0 2px 8px rgba(15, 60, 50, 0.05);
+    }
+
+    .settings-page--admin .settings-dues-section tbody tr:has(td[colspan]) {
+        display: block;
+    }
+
+    .settings-page--admin .settings-dues-section tbody tr:has(td[colspan]) td::before {
+        display: none;
+        content: none;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td {
+        display: block;
+        min-width: 0;
+        padding: 0.15rem 0 !important;
+        border: 0;
+        background: transparent;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td::before {
+        display: block;
+        margin-bottom: 0.15rem;
+        color: var(--text-muted, #687a73);
+        font-size: 0.85rem;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(1) {
+        grid-area: address;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(1)::before {
+        content: "Property Address";
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(2) {
+        grid-area: homeowner;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(2)::before {
+        content: "Homeowner";
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(3) {
+        grid-area: status;
+        justify-self: end;
+        text-align: right;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(3)::before {
+        content: "Status";
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(4) {
+        grid-area: due;
+    }
+
+    .settings-page--admin .settings-dues-section tbody td:nth-child(4)::before {
+        content: "Monthly Due (₱)";
+    }
+
+    .dues-homeowner-cell {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .dues-homeowner-name {
+        min-width: 0;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .main-content .dues-homeowner-details {
+        display: inline-flex;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        min-height: 40px;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border-radius: 0.5rem;
+    }
+
+    .settings-page--admin .settings-dues-section .input-group .form-control {
+        min-width: 0;
+        min-height: 44px;
+        font-size: 16px;
+    }
+
+    .settings-page--admin .settings-dues-section .settings-back-button {
+        min-height: 44px;
+    }
+
+    .dues-homeowner-modal-details {
+        display: grid;
+        grid-template-columns: minmax(110px, 0.75fr) minmax(0, 1fr);
+        gap: 0.8rem;
+        margin: 0;
+    }
+
+    .dues-homeowner-modal-details dt,
+    .dues-homeowner-modal-details dd {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .dues-homeowner-modal-details dt {
+        color: var(--text-muted, #687a73);
+        font-weight: 600;
+    }
+
+    .dues-homeowner-modal-details {
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row {
+        --bs-gutter-x: 0.75rem;
+        --bs-gutter-y: 0.75rem;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .stat-card-pastel,
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .card-body.stat-card {
+        min-height: 0;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .card-body.stat-card {
+        align-items: flex-start;
+        gap: 0.6rem;
+        padding: 0.85rem;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .stat-icon {
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .stat-label,
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .stat-note {
+        font-size: 0.9rem !important;
+        line-height: 1.35;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row .stat-value {
+        font-size: clamp(1.05rem, 5vw, 1.3rem);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-feature-row {
+        --bs-gutter-x: 0.85rem;
+        --bs-gutter-y: 0.85rem;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-revenue-chart {
+        min-height: 220px;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-quick-action {
+        min-height: 48px;
+        gap: 0.6rem;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--border-color-soft, #e4ebe7);
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-quick-action:last-child {
+        border-bottom: 0;
+    }
+
+    .main-content:has(.dashboard-kpi-row) .dashboard-follow-up .tx-row {
+        gap: 0.6rem;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:last-child {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:last-child > .btn,
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:last-child > form {
+        flex: 1 1 140px;
+        width: auto;
+        min-width: 0;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:last-child > form > .btn {
+        width: 100%;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:first-child {
+        min-width: 0;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:first-child .btn-icon {
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        margin-right: 0 !important;
+    }
+
+    .main-content:has(.homeowner-summary-card) .page-header > .d-flex:first-child h1 {
+        font-size: clamp(1.2rem, 5vw, 1.5rem);
+    }
+
+    .main-content:has(.homeowner-summary-card) .avatar-circle {
+        width: 72px;
+        height: 72px;
+        margin-inline: auto;
+        font-size: 1.6rem;
+    }
+
+    .main-content:has(.homeowner-summary-card) .detail-field {
+        min-width: 0;
+    }
+
+    .main-content:has(.homeowner-summary-card) .detail-label,
+    .main-content:has(.homeowner-summary-card) .detail-value {
+        font-size: 1rem;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
+    .analytics-page .an-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.5rem;
+        width: 100%;
+    }
+
+    .analytics-page .an-actions .btn {
+        display: inline-flex;
+        min-width: 0;
+        width: 100%;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        padding-inline: 0.45rem;
+        font-size: 0.9rem;
+        white-space: normal;
+    }
+
+    .analytics-page .an-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+    }
+
+    .analytics-page .an-kpi {
+        min-height: 126px;
+    }
+
+    .analytics-page .an-kpi .l {
+        font-size: 0.9rem;
+        line-height: 1.35;
+    }
+
+    .analytics-page .an-kpi strong {
+        font-size: clamp(1.2rem, 5vw, 1.5rem);
+    }
+}
+
+@media (min-width: 390px) and (max-width: 767.98px) {
+    .main-content:has(.dashboard-kpi-row) .dashboard-kpi-row > [class*="col-"] {
+        flex: 0 0 50%;
+        width: 50%;
+    }
+
+    .main-content:has(.homeowner-summary-card) .row:has(.homeowner-summary-card) > [class*="col-"] {
+        flex: 0 0 50%;
+        width: 50%;
+    }
+
+    .analytics-page .an-kpi {
+        min-height: 132px;
+    }
+}

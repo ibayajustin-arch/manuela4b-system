@@ -6,7 +6,7 @@ require_once '../includes/payment_methods.php';
 require_once '../includes/homeowner_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { 
-    header("Location: ../login.php"); 
+    header("Location: login.php");
     exit; 
 }
 
@@ -209,12 +209,47 @@ require_once '../includes/header.php';
     <?php require_once '../includes/sidebar.php'; ?>
     <div class="main-content">
         
-        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-            <div>
-                <h1><?= $archiveView ? 'Archived Receipts' : 'Payment Records' ?></h1>
-                <p class="text-muted mb-0"><?= $archiveView ? 'Restore receipts from this page.' : 'View all dues collections, issued receipts, and payment transactions.' ?></p>
-            </div>
-            <div class="d-flex gap-2">
+        <style>
+            /* Desktop: the bell is fixed 78px from the screen edge, so keep the buttons 12px clear of it. */
+            @media (min-width: 992px) {
+                .pay-page-actions { padding-right: calc(90px - clamp(1.25rem, 2.4vw, 3rem)); }
+            }
+            /* Row buttons: smaller and the same width. Phones keep their icon buttons. */
+            @media (min-width: 768px) {
+                html body .main-content .admin-payments-table .payment-record-actions form { display: block !important; width: 100%; }
+                html body .main-content .admin-payments-table .payment-record-actions {
+                    width: 116px;
+                    margin-inline: auto;
+                    align-items: stretch;
+                    gap: .25rem;
+                }
+                html body .main-content .admin-payments-table .payment-record-actions .btn {
+                    display: flex;
+                    width: 100% !important;
+                    height: 32px !important;
+                    min-height: 32px !important;
+                    align-items: center;
+                    justify-content: center;
+                    gap: .25rem;
+                    padding: .2rem .4rem !important;
+                    font-size: .7rem !important;
+                }
+            }
+            @media (max-width: 767.98px) {
+                html body .main-content .admin-payments-table .payment-record-actions .btn {
+                    width: 36px !important;
+                    min-width: 36px !important;
+                    height: 36px !important;
+                    min-height: 36px !important;
+                    font-size: .85rem;
+                }
+                html body .main-content .admin-payments-table .pay-name,
+                html body .main-content .admin-payments-table .pay-name .fw-semibold { font-size: .9rem !important; }
+                html body .main-content .admin-payments-table .pay-name .small,
+                html body .main-content .admin-payments-table .pay-ref { font-size: .75rem !important; }
+            }
+        </style>
+        <div class="pay-page-actions d-flex flex-wrap justify-content-end gap-2 mb-4">
                 <a href="payments.php<?= $archiveView ? '' : '?view=archive' ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-<?= $archiveView ? 'cash-stack' : 'archive' ?> me-1"></i><?= $archiveView ? 'Back to Payments' : 'Archives' ?>
                 </a>
@@ -223,7 +258,6 @@ require_once '../includes/header.php';
                         <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export CSV
                     </a>
                 <?php endif; ?>
-            </div>
         </div>
         <?php if ($archiveError): ?>
             <div class="alert alert-danger"><?= htmlspecialchars($archiveError) ?></div>
@@ -237,7 +271,7 @@ require_once '../includes/header.php';
 
         <div class="card mb-4">
             <div class="card-body">
-                <form method="GET" action="payments.php" class="row g-3 align-items-end">
+                <form method="GET" action="payments.php" class="row g-3 align-items-end" id="paymentsFilterForm">
                     <?php if ($archiveView): ?><input type="hidden" name="view" value="archive"><?php endif; ?>
                     <div class="col-md-4 col-lg-2">
                         <label class="form-label" for="paymentsSearch">Search</label>
@@ -275,19 +309,14 @@ require_once '../includes/header.php';
                         <label class="form-label">To Date</label>
                         <input type="date" name="to" class="form-control" value="<?= htmlspecialchars($to_date) ?>">
                     </div>
-                    <div class="col-md-4 col-lg-2 d-flex gap-2">
-                        <button type="submit" class="btn btn-primary flex-grow-1" title="Search">
-                            <i class="bi bi-search me-1"></i>Search
-                        </button>
-                        <?php if ($search !== '' || $street !== '' || $method !== '' || $from_date !== '' || $to_date !== ''): ?>
-                            <a href="payments.php<?= $archiveView ? '?view=archive' : '' ?>" class="btn btn-outline-secondary" title="Clear Filters"><i class="bi bi-x-lg"></i></a>
-                        <?php endif; ?>
+                    <div class="col-md-4 col-lg-2">
+                        <a href="payments.php<?= $archiveView ? '?view=archive' : '' ?>" id="paymentsClearFilters" class="btn btn-outline-secondary w-100" <?= ($search !== '' || $street !== '' || $method !== '' || $from_date !== '' || $to_date !== '') ? '' : 'hidden' ?>><i class="bi bi-x-lg me-1" aria-hidden="true"></i>Clear</a>
                     </div>
                 </form>
             </div>
         </div>
 
-        <div class="card">
+        <div class="card" id="paymentsResults" aria-live="polite">
             <div class="card-body p-0">
                 <div class="table-responsive border-0 shadow-none p-0">
                     <table class="table table-hover align-middle mb-0 admin-payments-table">
@@ -297,10 +326,7 @@ require_once '../includes/header.php';
                                 <th>Homeowner</th>
                                 <th>Date Paid</th>
                                 <th>Period Covered</th>
-                                <th>Method</th>
-                                <th class="text-end">Amount</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Actions</th>
+                                <th class="text-end">Amount</th><th class="text-center">Status</th><th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -315,28 +341,26 @@ require_once '../includes/header.php';
                                     $residentAddress = homeowner_address_label($row['block'] ?? '', $row['lot'] ?? '');
                             ?>
                                 <tr id="payment-record-<?= (int) $row['id'] ?>">
-                                    <td class="fw-bold">
+                                    <td class="fw-bold pay-ref">
                                         <?= !empty($row['receipt_no']) ? htmlspecialchars($row['receipt_no']) : '-' ?>
                                     </td>
                                     
-                                    <td>
+                                    <td class="pay-name">
                                         <div class="fw-semibold text-dark"><?= htmlspecialchars($displayName) ?></div>
                                         <div class="small text-muted"><?= htmlspecialchars($residentAddress, ENT_QUOTES, 'UTF-8') ?></div>
                                     </td>
                                     
-                                    <td class="text-muted"><?= $formattedDate ?></td>
+                                    <td class="text-muted m-hide"><?= $formattedDate ?></td>
                                     
-                                    <td>
+                                    <td class="pay-period">
                                         <span class="badge" style="background: var(--bg-color); color: var(--text-heading); border: 1px solid var(--border-color);">
                                             <?= htmlspecialchars($row['period_covered']) ?>
                                         </span>
                                     </td>
+                                    
+                                    <td class="text-end fw-bold text-dark m-hide">₱ <?= number_format($row['amount_paid'], 2) ?></td>
 
-                                    <td><?= payment_method_indicator_html($row['payment_method'] ?? null, $row['notes'] ?? null) ?></td>
-                                    
-                                    <td class="text-end fw-bold text-dark">₱ <?= number_format($row['amount_paid'], 2) ?></td>
-                                    
-                                    <td class="text-center">
+                                    <td class="text-center m-hide">
                                         <?php if($paymentStatus === 'Paid'): ?>
                                             <span class="badge badge-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
                                         <?php else: ?>
@@ -344,32 +368,42 @@ require_once '../includes/header.php';
                                         <?php endif; ?>
                                     </td>
                                     
-                                    <td class="text-center payment-record-actions-cell">
+                                    <td class="text-center payment-record-actions-cell pay-actions">
                                         <div class="payment-record-actions">
                                             <?php if($paymentStatus === 'Paid'): ?>
                                                 <button type="button"
-                                                        class="btn btn-sm btn-outline-secondary"
+                                                        class="btn btn-sm btn-outline-secondary act-icon"
+                                                        title="View receipt"
+                                                        aria-label="View receipt <?= htmlspecialchars($row['receipt_no'] ?? '') ?>"
                                                         onclick="openReceipt('payment', <?= (int) $row['id'] ?>)">
-                                                    <i class="bi bi-receipt me-1"></i> View Receipt
+                                                    <i class="bi bi-receipt"></i><span class="btn-label ms-1">View Receipt</span>
                                                 </button>
                                             <?php elseif (!$archiveView): ?>
                                                 <button type="button"
-                                                        class="btn btn-sm"
+                                                        class="btn btn-sm act-icon"
+                                                        title="Send reminder"
+                                                        aria-label="Send reminder to <?= htmlspecialchars($displayName) ?>"
                                                         style="background-color: var(--warning-soft); color: var(--warning-color);"
                                                         data-bs-toggle="modal"
                                                         data-bs-target="#reminderModal"
                                                         onclick="openReminderModal('<?= $row['id'] ?>', '<?= htmlspecialchars(addslashes($displayName)) ?>', '<?= htmlspecialchars(addslashes($row['period_covered'])) ?>', '<?= $row['amount_paid'] ?>')">
-                                                    <i class="bi bi-envelope-paper-fill me-1"></i> Send Reminder
+                                                    <i class="bi bi-envelope-paper-fill"></i><span class="btn-label ms-1">Send Reminder</span>
                                                 </button>
+                                            <?php endif; ?>
+                                            <?php if (!$archiveView && strpos((string) ($row['receipt_no'] ?? ''), 'PM-') !== 0): ?>
+                                                <a href="edit_payment.php?id=<?= (int) $row['id'] ?>" class="btn btn-sm btn-outline-secondary act-icon"
+                                                   title="Edit payment" aria-label="Edit payment <?= htmlspecialchars($row['receipt_no'] ?? '') ?>">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i><span class="btn-label ms-1">Edit</span>
+                                                </a>
                                             <?php endif; ?>
                                             <form method="POST" class="d-inline" onsubmit="return <?= $archiveView ? 'confirmReceiptRestore(this)' : "confirm('Archive this payment receipt?')" ?>;">
                                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf) ?>">
                                                 <input type="hidden" name="payment_id" value="<?= (int) $row['id'] ?>">
                                                 <input type="hidden" name="action" value="<?= $archiveView ? 'restore_payment' : 'archive_payment' ?>">
-                                                <button type="submit" class="btn btn-sm <?= $archiveView ? 'btn-outline-success' : 'btn-outline-secondary' ?>"
+                                                <button type="submit" class="btn btn-sm act-icon <?= $archiveView ? 'btn-outline-success' : 'btn-outline-secondary' ?>"
                                                     title="<?= $archiveView ? 'Restore receipt' : 'Archive receipt' ?>"
                                                     aria-label="<?= $archiveView ? 'Restore' : 'Archive' ?> receipt <?= htmlspecialchars($row['receipt_no'] ?? '') ?>">
-                                                    <i class="bi bi-<?= $archiveView ? 'arrow-counterclockwise' : 'archive' ?> me-1"></i><?= $archiveView ? 'Restore' : 'Archive' ?>
+                                                    <i class="bi bi-<?= $archiveView ? 'arrow-counterclockwise' : 'archive' ?>"></i><span class="btn-label ms-1"><?= $archiveView ? 'Restore' : 'Archive' ?></span>
                                                 </button>
                                             </form>
                                         </div>
@@ -416,6 +450,73 @@ require_once '../includes/header.php';
         </div>
     </div>
 </div>
+
+<script>
+// Filters apply as you type or choose: only the results card is refreshed.
+(function () {
+    var form = document.getElementById('paymentsFilterForm');
+    var results = document.getElementById('paymentsResults');
+    var clear = document.getElementById('paymentsClearFilters');
+    if (!form || !results) return;
+    var timer = null, request = null;
+
+    function refresh() {
+        var params = new URLSearchParams();
+        var hasFilter = false;
+        new FormData(form).forEach(function (value, key) {
+            if (String(value).trim() === '') return;
+            params.set(key, value);
+            if (key !== 'view') hasFilter = true;
+        });
+        var query = params.toString();
+        var url = 'payments.php' + (query ? '?' + query : '');
+        if (request) request.abort();
+        var current = request = new AbortController();
+        results.setAttribute('aria-busy', 'true');
+        results.style.opacity = '.6';
+
+        fetch(url, { signal: current.signal, credentials: 'same-origin' })
+            .then(function (response) {
+                // An expired session redirects to the login page.
+                if (response.redirected || !response.ok) throw new Error('reload');
+                return response.text();
+            })
+            .then(function (html) {
+                var next = new DOMParser().parseFromString(html, 'text/html').getElementById('paymentsResults');
+                if (!next) throw new Error('reload');
+                results.innerHTML = next.innerHTML;
+                history.replaceState(null, '', url);
+                if (clear) clear.hidden = !hasFilter;
+            })
+            .catch(function (error) {
+                if (error.name !== 'AbortError') window.location.href = url;
+            })
+            .finally(function () {
+                if (request === current) {
+                    request = null;
+                    results.removeAttribute('aria-busy');
+                    results.style.opacity = '';
+                }
+            });
+    }
+
+    form.addEventListener('input', function (event) {
+        if (event.target.type !== 'search') return;
+        clearTimeout(timer);
+        timer = setTimeout(refresh, 300);
+    });
+    form.addEventListener('change', function (event) {
+        if (event.target.type === 'search') return;
+        clearTimeout(timer);
+        refresh();
+    });
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        clearTimeout(timer);
+        refresh();
+    });
+})();
+</script>
 
 <?php if ($archiveView): ?>
 <div class="modal fade" id="receiptRestoreConfirmModal" tabindex="-1" aria-labelledby="receiptRestoreConfirmTitle" aria-hidden="true">

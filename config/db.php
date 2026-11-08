@@ -1,8 +1,9 @@
 <?php
 
 $httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$hostOnly = explode(':', $httpHost)[0];
-$isLocal = in_array($hostOnly, ['localhost', '127.0.0.1', '::1'], true) || (php_sapi_name() === 'cli' && empty($_SERVER['HTTP_HOST']));
+$hostOnly = strtolower(explode(':', $httpHost)[0]);
+$isLocal = in_array($hostOnly, ['localhost', '127.0.0.1', '::1'], true)
+        || (php_sapi_name() === 'cli' && empty($_SERVER['HTTP_HOST']));
 
 if ($isLocal) {
     $host     = "localhost";
@@ -19,12 +20,7 @@ if ($isLocal) {
 
 mysqli_report(MYSQLI_REPORT_OFF);
 
-$conn = @mysqli_connect(
-    $host,
-    $username,
-    $password,  
-    $database
-);
+$conn = @mysqli_connect($host, $username, $password, $database);
 
 if (!$conn) {
     error_log('Database connection failed: ' . mysqli_connect_error());
@@ -35,4 +31,11 @@ if (!$conn) {
         . "</div>");
 }
 
-?>
+// Support emojis and special characters (ñ, etc.) properly
+mysqli_set_charset($conn, 'utf8mb4');
+
+// Philippine time for NOW(), CURRENT_TIMESTAMP, created_at, etc.
+mysqli_query($conn, "SET time_zone = '+08:00'");
+
+// Clear the temporary connection variables so they don't leak into other pages
+unset($host, $username, $password, $database);

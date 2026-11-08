@@ -3,9 +3,10 @@ require_once '../config/init.php';
 require_once '../config/db.php';
 require_once '../includes/homeowner_helpers.php';
 require_once '../includes/archive_helpers.php';
+require_once '../includes/payment_recording.php';
 
 if (($_SESSION['role'] ?? '') !== 'admin' || empty($_SESSION['user_id'])) {
-    header('Location: ../login.php');
+    header('Location: login.php');
     exit;
 }
 
@@ -23,13 +24,7 @@ $homeownerId = filter_var(
 $homeowner = null;
 $error = '';
 $today = date('Y-m-d');
-$paymentMethods = [
-    'Cash' => 'Cash',
-    'GCash (admin-assisted)' => 'GCash (admin-assisted)',
-    'Maya (admin-assisted)' => 'Maya (admin-assisted)',
-    'Bank Transfer' => 'Bank Transfer',
-    'Other' => 'Other',
-];
+$paymentMethods = recorded_payment_methods();
 
 if ($homeownerId !== false && $homeownerId !== null) {
     $stmt = $conn->prepare('SELECT * FROM homeowners WHERE id = ? AND archived_at IS NULL LIMIT 1');
@@ -48,101 +43,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!$homeowner) {
         $error = 'Homeowner not found. Please select a valid homeowner.';
     } else {
-        $period = trim((string) ($_POST['period_covered'] ?? ''));
-        $paymentDate = trim((string) ($_POST['payment_date'] ?? ''));
-        $paymentMethod = (string) ($_POST['payment_method'] ?? '');
-        $reference = trim((string) ($_POST['reference'] ?? ''));
-        $notes = trim((string) ($_POST['notes'] ?? ''));
-        $date = DateTime::createFromFormat('!Y-m-d', $paymentDate);
-        $dateValid = $date && $date->format('Y-m-d') === $paymentDate && $paymentDate <= $today;
-
-        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $period)) {
-            $error = 'Please select a valid unpaid month.';
-        } elseif (!$dateValid) {
-            $error = 'Please enter a valid payment date that is not in the future.';
-        } elseif (!isset($paymentMethods[$paymentMethod])) {
-            $error = 'Please select a valid payment method.';
-        } elseif (strlen($reference) > 100 || strlen($notes) > 500) {
-            $error = 'The reference or notes exceed the allowed length.';
-        } else {
-            $transactionStarted = false;
-            try {
-                $conn->begin_transaction();
-                $transactionStarted = true;
-
-                $lockStmt = $conn->prepare('SELECT * FROM homeowners WHERE id = ? AND archived_at IS NULL FOR UPDATE');
-                if (!$lockStmt) {
-                    throw new RuntimeException('Unable to lock homeowner record.');
-                }
-                $lockStmt->bind_param('i', $homeownerId);
-                $lockStmt->execute();
-                $lockedHomeowner = $lockStmt->get_result()->fetch_assoc();
-                $lockStmt->close();
-                if (!$lockedHomeowner) {
-                    throw new InvalidArgumentException('Homeowner not found. Please select a valid homeowner.');
-                }
-
-                $summary = homeowner_account_summary($conn, $lockedHomeowner);
-                if (!in_array($period, $summary['unpaid'], true)) {
-                    throw new InvalidArgumentException('That month is already paid or is not due for this homeowner.');
-                }
-
-                $receiptNo = 'ADM-' . strtoupper(bin2hex(random_bytes(5)));
-                $recordNotes = 'Recorded by admin';
-                if ($reference !== '') {
-                    $recordNotes .= ' | Reference: ' . $reference;
-                }
-                if ($notes !== '') {
-                    $recordNotes .= ' | ' . $notes;
-                }
-                $amount = $summary['monthly_due'];
-                $collectorId = (int) $_SESSION['user_id'];
-                $stmt = $conn->prepare(
-                    'INSERT INTO payments (homeowner_id, amount_paid, payment_date, period_covered, receipt_no, payment_method, collector_id, notes)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-                );
-                if (!$stmt) {
-                    throw new RuntimeException('Unable to prepare payment record.');
-                }
-                $stmt->bind_param(
-                    'idssssis',
-                    $homeownerId,
-                    $amount,
-                    $paymentDate,
-                    $period,
-                    $receiptNo,
-                    $paymentMethod,
-                    $collectorId,
-                    $recordNotes
-                );
-                $stmt->execute();
-                $paymentId = $stmt->insert_id;
-                $stmt->close();
-
-                $conn->commit();
-                $transactionStarted = false;
-
-                log_activity(
-                    $conn,
-                    $homeownerId,
-                    'Recorded payment',
-                    'Receipt ' . $receiptNo . ' for ' . date('F Y', strtotime($period . '-01'))
-                );
-                $_SESSION['flash_success'] = 'Payment recorded successfully. You can view or print the receipt from the homeowner profile.';
-                header('Location: homeowner_view.php?id=' . $homeownerId . '#payment-' . $paymentId);
-                exit;
-            } catch (InvalidArgumentException $e) {
-                if ($transactionStarted) {
-                    $conn->rollback();
-                }
-                $error = $e->getMessage();
-            } catch (Throwable $e) {
-                if ($transactionStarted) {
-                    $conn->rollback();
-                }
-                error_log('Admin payment recording failed for homeowner ' . (int) $homeownerId . ': ' . $e->getMessage());
-                $error = 'We could not record this payment. Please try again.';
-            }
+        try {
+            $saved = record_dues_payment(
+                $conn,
+                (int) $homeownerId,
+                trim((string) ($_POST['period_covered'] ?? '')),
+                trim((string) ($_POST['payment_date'] ?? '')),
+                (string) ($_POST['payment_method'] ?? ''),
+                trim((string) ($_POST['reference'] ?? '')),
+                trim((string) ($_POST['notes'] ?? ''))
+            );
+            $_SESSION['flash_success'] = 'Payment recorded successfully. You can view or print the receipt from the homeowner profile.';
+            header('Location: homeowner_view.php?id=' . (int) $homeownerId . '#payment-' . $saved['id']);
+            exit;
+        } catch (InvalidArgumentException $e) {
+            $error = $e->getMessage();
+        } catch (Throwable $e) {
+            error_log('Admin payment recording failed for homeowner ' . (int) $homeownerId . ': ' . $e->getMessage());
+            $error = 'We could not record this payment. Please try again.';
         }
     }
 }
@@ -150,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $summary = $homeowner ? homeowner_account_summary($conn, $homeowner) : null;
 $unpaidMonths = $summary['unpaid'] ?? [];
 $selectedPeriod = (string) ($_POST['period_covered'] ?? ($unpaidMonths[0] ?? ''));
-$selectedMethod = (string) ($_POST['payment_method'] ?? 'Cash');
+$selectedMethod = (string) ($_POST['payment_method'] ?? array_key_first($paymentMethods));
 $selectedDate = (string) ($_POST['payment_date'] ?? $today);
 $reference = (string) ($_POST['reference'] ?? '');
 $notes = (string) ($_POST['notes'] ?? '');
@@ -198,7 +116,7 @@ require_once '../includes/header.php';
                         </div>
                     <?php else: ?>
                         <div class="alert alert-info border-0">
-                            Record a payment only after the homeowner has paid. For assisted GCash or Maya payments, complete and verify the transaction in the wallet first.
+                            Record a payment only after the homeowner has paid. Complete and verify the GCash or Maya transaction in the wallet first.
                         </div>
                         <form method="POST" data-fullscreen-loading="Recording payment..." data-loading-duration="900">
                             <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf, ENT_QUOTES, 'UTF-8') ?>">
@@ -232,9 +150,9 @@ require_once '../includes/header.php';
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="reference" class="form-label">Transaction/reference number <span class="text-muted">(optional)</span></label>
+                                    <label for="reference" class="form-label">Transaction/reference number</label>
                                     <input type="text" id="reference" name="reference" class="form-control" maxlength="100"
-                                           value="<?= htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') ?>">
+                                           value="<?= htmlspecialchars($reference, ENT_QUOTES, 'UTF-8') ?>" required>
                                 </div>
                                 <div class="col-12">
                                     <label for="notes" class="form-label">Notes <span class="text-muted">(optional)</span></label>
